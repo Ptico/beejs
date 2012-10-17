@@ -47,7 +47,7 @@ define(["base/attribute"], function(attr) {
       });
 
       it("should configure default value", function() {
-        obj.attribute("hello", { default: "world" });
+        obj.attribute("hello", { defaultVal: "world" });
 
         expect(obj.get("hello")).to.be.equal("world");
       });
@@ -77,7 +77,7 @@ define(["base/attribute"], function(attr) {
 
       it("should configure getter with default value", function() {
         obj.attribute("hello", {
-          default: "world",
+          defaultVal: "world",
           getter: function(value) {
             return "Hello " + value;
           }

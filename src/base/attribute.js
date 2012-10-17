@@ -84,7 +84,7 @@ define("base/attribute", ["base/util"], function(util) {
      *
      * @param {String} key       Attribute name
      * @param {Object} options   Attribute options
-     * @param            [options.default]  Default value for attribute
+     * @param            [options.defaultVal]  Default value for attribute
      * @param {String}   [options.type]     Attribute type, can be a string, integer, boolean, date, array or object
      * @param {Function} [options.setter]   Setter function for attribute
      * @param {Function} [options.getter]   Getter function for attribute
@@ -154,9 +154,22 @@ define("base/attribute", ["base/util"], function(util) {
 
       this._attrTracking[key] = this.get(key);
 
-      if (conf.setter) val = conf.setter(val);
+      if (conf.setter) val = conf.setter.call(this, val);
 
       return this._attrStorage.set(this, key, val);
+    },
+
+    /**
+     * Update existing object
+     *
+     * @param {Object} attributes Object with keys and values for update
+     */
+    update: function(attributes) {
+      for (var key in attributes) {
+        this.set(key, attributes[key]);
+      }
+
+      return this;
     },
 
     /**
@@ -171,9 +184,9 @@ define("base/attribute", ["base/util"], function(util) {
       var val,
           conf = this._attrConfig[key] || {};
 
-      val = this._attrStorage.get(this, key) || defaultVal || conf.default; // FIXME - boolean attribute
+      val = this._attrStorage.get(this, key) || defaultVal || conf.defaultVal; // FIXME - boolean attribute
 
-      return conf.getter ? conf.getter(val) : val;
+      return conf.getter ? conf.getter.call(this, val) : val;
     },
 
     /**
@@ -198,6 +211,13 @@ define("base/attribute", ["base/util"], function(util) {
       if (!this._attrs) attrTarget.call(this);
 
       return this._attrTracking[key];
+    },
+
+    /**
+     * Get attributes for JSON
+     */
+    toJSON: function() {
+      return this._attrs;
     }
   };
 

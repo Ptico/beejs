@@ -97,7 +97,7 @@ define("base/event", [], function() {
             returnValue;
 
         try {
-          returnValue = handler.fn.call(handler.binding, event);
+          returnValue = handler.fn.call(handler.context, event);
         } catch(e) {
           // TODO - Log error
         }
@@ -128,7 +128,7 @@ define("base/event", [], function() {
             var afterHandler = afters[j++];
 
             try {
-              afterHandler.fn.call(afterHandler.binding, event);
+              afterHandler.fn.call(afterHandler.context, event);
             } catch(e) {
               
             }
@@ -223,16 +223,16 @@ define("base/event", [], function() {
      *
      * @param {String}   type      Event name
      * @param {Function} callback  Callback function to add
-     * @param {Object}   [binding] Context for using as `this` in callback
+     * @param {Object}   [context] Context for using as `this` in callback
      * @param {Boolean}  [once]    Callback should fire once?
      */
-    on: function(type, callback, binding, once) {
+    on: function(type, callback, context, once) {
       if (!this._events) EventTarget.call(this);
 
-      if (!binding) binding = this;
+      if (!context) context = this;
 
       var events  = this._events,
-          handler = { fn: callback, binding: binding };
+          handler = { fn: callback, context: context };
 
       if (once) handler.once = true;
 
@@ -252,21 +252,21 @@ define("base/event", [], function() {
      * @param {String} type Event name
      * @param {Function} callback Listener function to add
      */
-    once: function(type, callback, binding) {
+    once: function(type, callback, context) {
       if (!this._events) EventTarget.call(this);
-      return this.on(type, callback, binding, true);
+      return this.on(type, callback, context, true);
     },
 
     /**
      * Add after callback
      */
-    after: function(type, callback, binding) {
+    after: function(type, callback, context) {
       if (!this._events) EventTarget.call(this);
 
-      if (!binding) binding = this;
+      if (!context) context = this;
 
       var events  = this._events,
-          handler = { fn: callback, binding: binding };
+          handler = { fn: callback, context: context };
 
       if (!events[type]) events[type] = new EventListener(this._eventOptions);
 

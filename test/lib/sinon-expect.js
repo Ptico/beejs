@@ -7,6 +7,10 @@
 
   if (global.expect) {
     Assertion = global.expect.Assertion;
+  } else if (global.define && global.define.amd) {
+    require("expect", function(expect) {
+      Assertion = expect.Assertion;
+    });
   } else {
     Assertion = require("expect.js").Assertion;
   }
