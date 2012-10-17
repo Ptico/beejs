@@ -1,5 +1,7 @@
 # Bee.js
 
+[![Build Status](https://secure.travis-ci.org/Ptico/beejs.png)](http://travis-ci.org/Ptico/beejs)
+
 ## Base
 
 ### Event

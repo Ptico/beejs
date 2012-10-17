@@ -66,13 +66,21 @@ define("base/enumerator", [], function() {
       return result;
     },
 
-    pluck: function(key, context) {
+    /**
+     * Get list of properties from collection
+     *
+     *     var people = [{ name: "Jim", age: 21 }, { name: "Joe", age: 23 }];
+     *
+     *     people.pluck("name"); //=> ["Jim", "Joe"]
+     *     people.pluck("age");  //=> [21, 23]
+     *
+     * @param {String} key Property name to get
+     */
+    pluck: function(key) {
       var array  = this,
           len    = array.length,
           result = new array.constructor(len),
           i      = 0;
-
-      context = context || array;
 
       for (; i < len; i++) result[i] = array[i][key];
 

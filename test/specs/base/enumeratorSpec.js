@@ -43,7 +43,11 @@ define(["base/util", "base/enumerator"], function(util, enumerator) {
         expect(result).to.eql(["1", "2", "3", "4", "5"]);
       });
 
-      it("#pluck");
+      it("should get keys with #pluck method", function() {
+        result = names.pluck("length");
+
+        expect(result).to.eql([3, 5, 4, 6, 3, 5, 7, 3]);
+      });
 
       it("should reduce Array with #reduce method", function() {
         result = nums.reduce(function(sum, val) {
