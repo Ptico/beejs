@@ -24,6 +24,7 @@ module.exports = function( grunt ) {
       browser:  true,
       trailing: true,
       regexp:   true,
+      expr:     true,
       indent:   2,
       globals: {
         define: true
@@ -60,5 +61,6 @@ module.exports = function( grunt ) {
 
   });
 
-  grunt.registerTask('default', 'lint test');
+  grunt.registerTask('test', 'mocha');
+  grunt.registerTask('default', 'lint mocha');
 };

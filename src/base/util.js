@@ -17,13 +17,14 @@ define("base/util", [], function() {
      *     util.namespace(this, "hello.world");
      */
     namespace: function() {
-      var first  = arguments[0], nsArray,
-          l, i = 0; 
+      var first = arguments[0], nsArray,
+          i = 0,
+          target, l, name, obj;
 
       if (typeof first === "string") {
-        var target = this, name = first, obj = arguments[1];
+        target = this, name = first, obj = arguments[1];
       } else {
-        var target = first, name = arguments[1], obj = arguments[2];
+        target = first, name = arguments[1], obj = arguments[2];
       }
 
       obj = obj !== undefined ? obj : {};
@@ -155,12 +156,12 @@ define("base/util", [], function() {
       if (type == "string")  return (valType == "object" ? JSON.stringify(value) : String(value));
       if (type == "number")  return parseFloat(value);
       if (type == "boolean") return !!value;
-      if (type == "regexp")  return RegExp(value);
+      if (type == "regexp")  return new RegExp(value);
       if (type == "array") {
         if (valType == "number") return [value];
         if (valType == "string" && value.indexOf(",")) return value.split(commaReg);
 
-        return Array(value);
+        return new Array(value);
       }
     },
 
@@ -242,7 +243,7 @@ define("base/util", [], function() {
     l: function(t) {
       var hour = t.getHours();
 
-      if (hour === 0) { hour = 12 } else if (hour > 12) hour -= 12;
+      if (hour === 0) { hour = 12; } else if (hour > 12) hour -= 12;
       return hour + '';
     },
     m: function(t) { return ("0" + (t.getMonth() + 1)).slice(-2); },
@@ -256,7 +257,7 @@ define("base/util", [], function() {
     y: function(t) { return (t.getFullYear() + "").slice(-2); },
     Z: function(t) { return t.toString().replace(tzReg, '$1'); },
     z: function(t) {
-      var offset = date.getTimezoneOffset();
+      var offset = t.getTimezoneOffset();
       return (offset >= 0 ? "-" : "") + ("0" + (offset / 60)).slice(-2) + ":" + ("0" + (offset % 60)).slice(-2);
     }
   };

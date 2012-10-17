@@ -66,7 +66,7 @@ define("base/enumerator", [], function() {
       return result;
     },
 
-    pluck: function(key) {
+    pluck: function(key, context) {
       var array  = this,
           len    = array.length,
           result = new array.constructor(len),
@@ -228,7 +228,11 @@ define("base/enumerator", [], function() {
         var val = array[i],
             key = (isFn ? fn.call(context, val, i, array) : val[fn]()).toString();
 
-        (result[key]) ? result[key].push(val) : result[key] = [val];
+        if (result[key]) {
+          result[key].push(val);
+        } else {
+          result[key] = [val];
+        }
       }
 
       return result;

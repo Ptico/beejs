@@ -42,17 +42,7 @@ require("base/util", "base/attribute", function(util, attr) {
 });
 ```
 
-## Requirements:
+## Development and testing requirements
 
-* node.js
-* npm
-
-Node modules:
-
-npm install jake
-npm install mocha
-npm install expect.js
-npm install sinon
-npm install requirejs
-npm install jshint
-npm install minimatch
+    npm install
+    brew install phantomjs
