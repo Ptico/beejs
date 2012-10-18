@@ -48,3 +48,7 @@ require("base/util", "base/attribute", function(util, attr) {
 
     npm install
     brew install phantomjs
+
+## License
+
+MIT license: http://www.opensource.org/licenses/MIT
