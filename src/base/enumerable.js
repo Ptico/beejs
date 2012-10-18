@@ -1,11 +1,12 @@
 define("base/enumerable", [], function() {
   "use strict";
 
-  var Enum = {};
+  var Enum = {},
+      Enumerator;
 
-  Enum.List = function() {};
+  Enum.Enumerator = function() {};
 
-  Enum.List.prototype = {
+  Enum.Enumerator.prototype = Enumerator = {
     /**
      * Iterate over array
      */
@@ -254,7 +255,51 @@ define("base/enumerable", [], function() {
     }
   };
 
-  Enum.List.provides = "enumerable";
+  Enum.Enumerator.provides = "enumerable";
+
+  Enum.List = function(collection) {
+    if (arguments.length > 1) collection = arguments;
+
+    if (Object.defineProperty !== void 0) {
+      Object.defineProperty(this, "length", {
+        writable: true,
+        enumerable: false,
+        configurable: false,
+        value: 0
+      });
+    }
+
+    if (collection === void 0) {
+      this.length = 0;
+    } else if (collection.length) {
+      var i = 0, l = collection.length;
+      for (; i < l; i++) this[i] = collection[i];
+
+      this.length = l;
+    } else if (collection % 1 === 0) {
+      var len = parseInt(collection, 10);
+
+      for (var j=0; j < len; j++) {
+        this[j] = void 0;
+      }
+
+      this.length = j;
+    } else {
+      this[0] = collection;
+      this.length = 1;
+    }
+
+  };
+
+  var Copy = function() { this.constructor = Enum.List; };
+  Copy.prototype = Array.prototype;
+  Enum.List.prototype = new Copy();
+
+  for (var meth in Enumerator) {
+    if (meth !== "constructor") {
+      Enum.List.prototype[meth] = Enumerator[meth];
+    }
+  }
 
   return Enum;
 });

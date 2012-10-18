@@ -1,19 +1,16 @@
 define(["base/util", "base/enumerable"], function(util, enumerable) {
 
   describe("Enumerable", function() {
-    describe("Array", function() {
+    describe("List", function() {
       var nums, names, result;
 
       beforeEach(function() {
-        nums   = [1, 2, 3, 4, 5];
-        names  = ["Ann", "Peter", "John", "Andrew", "Bob", "Garry", "Suzanne", "Jim"];
+        nums   = new enumerable.List(1, 2, 3, 4, 5);
+        names  = new enumerable.List("Ann", "Peter", "John", "Andrew", "Bob", "Garry", "Suzanne", "Jim")
         result = [];
-
-        util.mix(enumerable.List, nums);
-        util.mix(enumerable.List, names);
       });
 
-      it("should iterate Array with #each method", function() {
+      it("should iterate list with #each method", function() {
         nums.each(function(v, i) {
           result.push(v + i);
         });
@@ -21,7 +18,7 @@ define(["base/util", "base/enumerable"], function(util, enumerable) {
         expect(result).to.eql([1, 3, 5, 7, 9]);
       });
 
-      it("should iterate Array with #eachSlice method", function() {
+      it("should iterate list with #eachSlice method", function() {
         nums.eachSlice(2, function(v, i) {
           result.push(v);
         });
@@ -29,7 +26,7 @@ define(["base/util", "base/enumerable"], function(util, enumerable) {
         expect(result).to.eql([[1, 2], [3, 4], [5]]);
       });
 
-      it("should map Array with #map method", function() {
+      it("should map list with #map method", function() {
         result = nums.map(function(v, i) {
           return v + i;
         });
@@ -37,7 +34,7 @@ define(["base/util", "base/enumerable"], function(util, enumerable) {
         expect(result).to.eql([1, 3, 5, 7, 9]);
       });
 
-      it("should map Array with #map method with string as iterator", function() {
+      it("should map list with #map method with string as iterator", function() {
         result = nums.map("toString");
 
         expect(result).to.eql(["1", "2", "3", "4", "5"]);
@@ -49,7 +46,7 @@ define(["base/util", "base/enumerable"], function(util, enumerable) {
         expect(result).to.eql([3, 5, 4, 6, 3, 5, 7, 3]);
       });
 
-      it("should reduce Array with #reduce method", function() {
+      it("should reduce list with #reduce method", function() {
         result = nums.reduce(function(sum, val) {
           return sum + val;
         });
