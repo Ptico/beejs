@@ -118,7 +118,7 @@ define("base/enumerable", [], function() {
      *     nums.find(function(v) { return v > 2; }); //=> 3
      *
      * @param {Function} fn        Iterator function or key string
-     * @param            [context] Context for using as `this` in a callback
+     * @param            [context] Context for using as `this` inside function
      */
     find: function(fn, context) {
       var array = this, i = 0, len = array.length;
@@ -138,7 +138,7 @@ define("base/enumerable", [], function() {
      *     nums.findAll(function(v) { return v > 2; }); //=> [3, 4]
      *
      * @param {Function} fn        Iterator function or key string
-     * @param            [context] Context for using as `this` in a callback
+     * @param            [context] Context for using as `this` inside function
      */
     findAll: function(fn, context) {
       var array  = this,
@@ -171,7 +171,7 @@ define("base/enumerable", [], function() {
      *     // Will result: ["Ann", "Bob", "John", "Peter", "Garry"]
      *
      * @param {Function|String} fn        Iterator function or key string
-     * @param                   [context] Context for using as `this` in a callback
+     * @param                   [context] Context for using as `this` inside function
      */
     sortBy: function(fn, context) {
       var array    = this,
@@ -222,7 +222,7 @@ define("base/enumerable", [], function() {
      *     // Will result: { "3": ["Ann", "Bob"], "4": ["John"], 5: ["Peter", "Garry"] }
      *
      * @param {Function|String} fn        Iterator function or key string
-     * @param                   [context] Context for using as `this` in a callback
+     * @param                   [context] Context for using as `this` inside function
      */
     groupBy: function(fn, context) {
       var array  = this,
@@ -248,18 +248,57 @@ define("base/enumerable", [], function() {
     },
 
     /**
+     * Returns the number of items in List.
+     * If an argument is given, counts the number of items in List, for which
+     * equals to item. If a function is given, counts the number of elements
+     * yielding a true value.
      *
+     *     var names = ["Fil", "Bob", "Fil", "Jack"];
+     *
+     *     names.count(); //=> 4
+     *     names.count("Fil"); //=> 2
+     *     names.count(function(name) { return name.length > 3; }); //=> 1
+     *
+     * @param [match]   Function contains the condition to count, or object to find and count in List
+     * @param [context] Context for using as `this` inside function
      */
-    count: function() {
-      
+    count: function(match, context) {
+      var array = this,
+          len   = array.length,
+          i = 0,
+          j = 0;
+
+      if (match === void 0) {
+        return len;
+      } else if (match.call !== void 0) {
+        context = context || array;
+
+        for (; i < len; i++) if (match.call(context, array[i], i, array)) j++;
+      } else {
+        for (; i < len; i++) if (match === array[i]) j++;
+      }
+
+      return j;
     }
   };
 
   Enum.Enumerator.provides = "enumerable";
 
+  /**
+   * Array-like object extended with enumerable.Enumerator
+   * List constructor works as Array constructor with one difference:
+   * when we pass an Array - it converts to List
+   *
+   * @class
+   * @param {collection} Array to convert to List
+   */
   Enum.List = function(collection) {
-    if (arguments.length > 1) collection = arguments;
+    if (arguments.length > 1) {
+      collection = arguments;
+      collection.map = true; // Hack
+    }
 
+    // Hide length from enums if possible
     if (Object.defineProperty !== void 0) {
       Object.defineProperty(this, "length", {
         writable: true,
@@ -269,14 +308,14 @@ define("base/enumerable", [], function() {
       });
     }
 
-    if (collection === void 0) {
+    if (collection === void 0) { // Empty List
       this.length = 0;
-    } else if (collection.length) {
+    } else if (collection.map !== void 0) { // Convert Array to List
       var i = 0, l = collection.length;
       for (; i < l; i++) this[i] = collection[i];
 
       this.length = l;
-    } else if (collection % 1 === 0) {
+    } else if (collection % 1 === 0) { // List with predefined length
       var len = parseInt(collection, 10);
 
       for (var j=0; j < len; j++) {
@@ -284,17 +323,18 @@ define("base/enumerable", [], function() {
       }
 
       this.length = j;
-    } else {
+    } else { // Single item in List: List("foo") => ["foo"]
       this[0] = collection;
       this.length = 1;
     }
-
   };
 
-  var Copy = function() { this.constructor = Enum.List; };
+  // Copy array prototype to List prototype
+  var Copy = function() {};
   Copy.prototype = Array.prototype;
   Enum.List.prototype = new Copy();
 
+  // Extend List prototype with Enumerator
   for (var meth in Enumerator) {
     if (meth !== "constructor") {
       Enum.List.prototype[meth] = Enumerator[meth];

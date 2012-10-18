@@ -86,6 +86,16 @@ define(["base/util", "base/enumerable"], function(util, enumerable) {
         expect(result["7"]).to.eql(["Suzanne"]);
       });
 
+      it("should count elements in list", function() {
+        result = names.count(function(name) {
+          return name.length > 5;
+        });
+
+        expect(nums.count()).to.be.equal(5);
+        expect(names.count("Jim")).to.be.equal(1);
+        expect(result).to.be.equal(2);
+      });
+
       it("should bind context to iterator", function() {
         var bound = { val: 2 };
 
