@@ -33,9 +33,10 @@ module.exports = function( grunt ) {
 
     // Lists of files to be minified with UglifyJS, used by the "min" task.
     min: {
-      util:      { src: ["src/base/attribute.js"], dest: "dist/minified/base/attribute.js" },
-      attribute: { src: ["src/base/attribute.js"], dest: "dist/minified/base/attribute.js" },
-      event:     { src: ["src/base/event.js"],     dest: "dist/minified/base/event.js" }
+      util:       { src: ["src/base/util.js"],      dest: "dist/minified/base/util.js" },
+      attribute:  { src: ["src/base/attribute.js"], dest: "dist/minified/base/attribute.js" },
+      event:      { src: ["src/base/event.js"],     dest: "dist/minified/base/event.js" },
+      enumerable: { src: ["src/base/enumerable.js"],dest: "dist/minified/base/enumerable.js" }
     },
 
     // Global configuration options for UglifyJS.

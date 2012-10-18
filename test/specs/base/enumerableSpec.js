@@ -1,4 +1,4 @@
-define(["base/util", "base/enumerator"], function(util, enumerator) {
+define(["base/util", "base/enumerable"], function(util, enumerable) {
 
   describe("Enumerable", function() {
     describe("Array", function() {
@@ -9,8 +9,8 @@ define(["base/util", "base/enumerator"], function(util, enumerator) {
         names  = ["Ann", "Peter", "John", "Andrew", "Bob", "Garry", "Suzanne", "Jim"];
         result = [];
 
-        util.mix(enumerator.List, nums);
-        util.mix(enumerator.List, names);
+        util.mix(enumerable.List, nums);
+        util.mix(enumerable.List, names);
       });
 
       it("should iterate Array with #each method", function() {

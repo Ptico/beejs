@@ -1,4 +1,4 @@
-define("base/enumerator", [], function() {
+define("base/enumerable", [], function() {
   "use strict";
 
   var Enum = {};
@@ -254,7 +254,7 @@ define("base/enumerator", [], function() {
     }
   };
 
-  Enum.List.provides = "enumerator";
+  Enum.List.provides = "enumerable";
 
   return Enum;
 });
