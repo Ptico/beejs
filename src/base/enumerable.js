@@ -260,9 +260,34 @@ define("base/enumerable", [], function() {
       return result;
     },
 
-    
+    /**
+     * Returns an array containing all elements of enum for which function result is false
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
+     *
+     *     var nums = [1, 2, 3, 4];
+     *
+     *     nums.reject(function(v) { return v > 2; }); //=> [1, 2]
+     *
+     * @param {Function} fn        Iterator function or key string
+     * @param            [context] Context for using as `this` inside functionz
+     */
     reject: function(fn, context) {
-      
+      var array  = this,
+          len    = array.length,
+          result = new array.constructor(),
+          i      = 0;
+
+      context = context || array;
+
+      for (; i < len; i++) if (!fn.call(context, array[i], i, array)) result.push(array[i]);
+
+      return result;
     },
 
     /**

@@ -78,6 +78,14 @@ define(["base/util", "base/enumerable"], function(util, enumerable) {
         expect(result).to.eql([4, 5]);
       });
 
+      it("should reject elements with #reject method", function() {
+        result = nums.reject(function(val) {
+          return val > 3;
+        });
+
+        expect(result).to.eql([1, 2, 3]);
+      });
+
       it("should sort elements with #sortBy method", function() {
         result = names.sortBy(function(v) { return v.length; });
 
