@@ -204,7 +204,7 @@ define(["base/event"], function(event) {
       });
 
       it("should delay event handling", function() {
-        target.event("work", { delayed: true });
+        target.event("work", { deferred: true });
 
         target.on("work", spy);
 
@@ -213,13 +213,13 @@ define(["base/event"], function(event) {
         expect(spy).to.not.be.called();
       });
 
-      it("should fire delayed", function() {
+      it("should fire deferred", function() {
         var spyTwo   = sinon.spy(),
             spyThree = sinon.spy();
 
-        target.event("work", { delayed: true });
-        target.event("eat", { delayed: true });
-        target.event("sleep", { delayed: true });
+        target.event("work", { deferred: true });
+        target.event("eat", { deferred: true });
+        target.event("sleep", { deferred: true });
 
         target.on("work", spy);
         target.on("eat", spyTwo);
@@ -228,7 +228,7 @@ define(["base/event"], function(event) {
         target.fire("work");
         target.fire("eat");
 
-        target.fireDelayed();
+        target.resolve();
 
         expect(spy).to.be.called();
         expect(spyTwo).to.be.called();

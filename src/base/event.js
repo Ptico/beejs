@@ -190,7 +190,7 @@ define("base/event", [], function() {
     this._events = {};
     this._eventOptions = (options || this._eventOptions || {}); // TODO - check eventOptions read/rewrite
     this._eventTargets = [];
-    this._eventDelayed = {};
+    this._eventDeferred = {};
   };
 
   EventTarget.prototype = {
@@ -209,7 +209,7 @@ define("base/event", [], function() {
      * @param {String}   type                Event name
      * @param {Object}   [options]           Options for event
      * @param {Function} [options.defaultFn] Default function for event
-     * @param {Boolean}  [options.delayed]   Delay firing and fire with `.fireDelayed()`
+     * @param {Boolean}  [options.deferred]  Delay firing and fire with `.resolve()`
      * @param {Boolean}  [options.once]      Fire all handlers once
      */
     event: function(type, options) {
@@ -335,8 +335,8 @@ define("base/event", [], function() {
       if (this._events[type]) {
         var eventOpts = this._events[type].options;
 
-        if (eventOpts.delayed && !now) {
-          this._eventDelayed[type] = event;
+        if (eventOpts.deferred && !now) {
+          this._eventDeferred[type] = event;
           return this;
         }
 
@@ -376,20 +376,20 @@ define("base/event", [], function() {
     },
 
     /**
-     * Dispatch delayed events
+     * Dispatch deferred events
      *
      *     target.on("hello", function(ev) { console.log("Hello " + ev.who); });
-     *     target.event("hello", { delayed: true });
+     *     target.event("hello", { deferred: true });
      *     target.fire("hello", { who: "world" }); // Nothing happens
      *     target.fire("hello", { who: "universe" }); // Nothing happens
-     *     target.fireDelayed(); // "Hello world" "Hello universe"
+     *     target.resolve(); // "Hello world" "Hello universe"
      */
-    fireDelayed: function() {
-      var delayed = this._eventDelayed;
+    resolve: function() {
+      var deferred = this._eventDeferred;
 
-      for (var type in delayed) {
-        if (delayed.hasOwnProperty(type)) {
-          this.fire(type, delayed[type], true);
+      for (var type in deferred) {
+        if (deferred.hasOwnProperty(type)) {
+          this.fire(type, deferred[type], true);
         }
       }
 
