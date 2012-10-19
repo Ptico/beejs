@@ -8,10 +8,26 @@ define("base/enumerable", [], function() {
 
   Enum.Enumerator.prototype = Enumerator = {
     /**
-     * Iterate over array
+     * Executes a provided function for each element in enum
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
+     *
+     *     var nums = [1, 2, 3];
+     *
+     *     nums.each(function(v) { console.log(v); });
+     *
+     * @param {Function} fn        Iterator function or key string
+     * @param            [context] Context for using as `this` inside function
      */
     each: function(fn, context) {
-      var array = this, i = 0, len = array.length;
+      var array = this,
+          i = 0,
+          len = array.length >>> 0;
 
       context = context || array;
 
@@ -25,13 +41,24 @@ define("base/enumerable", [], function() {
     },
 
     /**
-     * Iterates the given function for each slice of <num> elements
+     * Executes a provided function for each slice of `num` elements
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - slice of values of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
+     *
+     * @param {Number}   num       The number of items to include in each slice
+     * @param {Function} fn        Iterator function or key string
+     * @param            [context] Context for using as `this` inside function
      */
     eachSlice: function(num, fn, context) {
       var array = this,
           i = 0,
           j = 0,
-          len = array.length,
+          len = array.length >>> 0,
           iters = -~(len / num),
           k, res;
 
@@ -49,11 +76,29 @@ define("base/enumerable", [], function() {
       return this;
     },
 
-    
+    /**
+     * Creates a new enum with the results of calling a provided function
+     * on each element in this enum.
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
+     *
+     *     var names = ["jim", "joe"];
+     *
+     *     names.map(function(n) { return n.toUpperCase(); }); //=> ["JIM", "JOE"]
+     *     names.map("toUpperCase"); //=> ["JIM", "JOE"]
+     *
+     * @param {Function} fn        Iterator function or key string
+     * @param            [context] Context for using as `this` inside function
+     */
     map: function(fn, context) {
       var array  = this,
-          len    = array.length,
-          result = new array.constructor(len),
+          len    = array.length >>> 0,
+          result = new array.constructor(),
           i      = 0;
 
       context = context || array;
@@ -68,7 +113,7 @@ define("base/enumerable", [], function() {
     },
 
     /**
-     * Get list of properties from collection
+     * Creates a new enum with the given property of each element
      *
      *     var people = [{ name: "Jim", age: 21 }, { name: "Joe", age: 23 }];
      *
@@ -79,8 +124,8 @@ define("base/enumerable", [], function() {
      */
     pluck: function(key) {
       var array  = this,
-          len    = array.length,
-          result = new array.constructor(len),
+          len    = array.length >>> 0,
+          result = new array.constructor(),
           i      = 0;
 
       for (; i < len; i++) result[i] = array[i][key];
@@ -88,20 +133,34 @@ define("base/enumerable", [], function() {
       return result;
     },
 
+    /**
+     * Produces single result from enum elements
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
+     * 
+     * @param {Function} fn        Iterator function or key string
+     * @param            initial   Object to use as the first argument to the first call of the `fn`
+     * @param            [context] Context for using as `this` inside function
+     */
     reduce: function(fn, initial, context) {
-      var i = 0, l = this.length, curr;
-
-      context = context || void 0;
+      var array = this, i = 0, l = array.length >>> 0, curr;
 
       if (initial === void 0) {
-        curr = this[0];
+        curr = array[0];
         i = 1;
       } else {
         curr = initial;
       }
 
+      context = context || array;
+
       while (i < l) {
-        if (i in this) curr = fn.call(context, curr, this[i], i, this);
+        if (i in array) curr = fn.call(context, curr, array[i], i, array);
         ++i;
       }
 
@@ -112,6 +171,14 @@ define("base/enumerable", [], function() {
 
     /**
      * Passes each entry in enum to function. Returns the first for which function result is not false
+     * Alias: #detect
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
      *
      *     var nums = [1, 2, 3, 4];
      *
@@ -121,7 +188,7 @@ define("base/enumerable", [], function() {
      * @param            [context] Context for using as `this` inside function
      */
     find: function(fn, context) {
-      var array = this, i = 0, len = array.length;
+      var array = this, i = 0, len = array.length >>> 0;
 
       context = context || array;
 
@@ -132,6 +199,14 @@ define("base/enumerable", [], function() {
 
     /**
      * Returns an array containing all elements of enum for which function result is not false
+     * Alias: #select
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
      *
      *     var nums = [1, 2, 3, 4];
      *
@@ -142,7 +217,7 @@ define("base/enumerable", [], function() {
      */
     findAll: function(fn, context) {
       var array  = this,
-          len    = array.length,
+          len    = array.length >>> 0,
           result = new array.constructor(),
           i      = 0;
 
@@ -153,19 +228,26 @@ define("base/enumerable", [], function() {
       return result;
     },
 
+    
     reject: function(fn, context) {
       
     },
 
     /**
-     * Sorts enum using a set of keys generated by mapping the values in enum through the given function.
+     * Sorts enum using a set of keys generated by mapping the elements in enum 
+     * through the given function.
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
      *
      *     var names = ["Ann", "Peter", "John", "Bob", "Garry"];
      *
      *     names.sortBy(function(name) { return name.length; });
-     *
      *     // or shorter variant:
-     *
      *     names.sortBy("length");
      *
      *     // Will result: ["Ann", "Bob", "John", "Peter", "Garry"]
@@ -175,8 +257,8 @@ define("base/enumerable", [], function() {
      */
     sortBy: function(fn, context) {
       var array    = this,
-          len      = array.length,
-          sortable = new array.constructor(len),
+          len      = array.length >>> 0,
+          sortable = new array.constructor(),
           i        = 0,
           isFn     = (fn.call !== void 0),
           sorted;
@@ -208,15 +290,20 @@ define("base/enumerable", [], function() {
     },
 
     /**
-     * Returns a hash, which keys are evaluated result from the block,
+     * Returns a hash, which keys are evaluated result from the function,
      * and values are arrays of elements in enum corresponding to the key.
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
      *
      *     var names = ["Ann", "Peter", "John", "Bob", "Garry"];
      *
      *     names.groupBy(function(name) { return name.length; });
-     *
      *     // or shorter variant:
-     *
      *     names.groupBy("length");
      *
      *     // Will result: { "3": ["Ann", "Bob"], "4": ["John"], 5: ["Peter", "Garry"] }
@@ -227,7 +314,7 @@ define("base/enumerable", [], function() {
     groupBy: function(fn, context) {
       var array  = this,
           i      = 0,
-          len    = array.length,
+          len    = array.length >>> 0,
           isFn   = (fn.call !== void 0),
           result = {};
 
@@ -248,10 +335,17 @@ define("base/enumerable", [], function() {
     },
 
     /**
-     * Returns the number of items in List.
+     * Returns the number of elements in enum.
      * If an argument is given, counts the number of items in List, for which
-     * equals to item. If a function is given, counts the number of elements
+     * equals to element. If a function is given, counts the number of elements
      * yielding a true value.
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
      *
      *     var names = ["Fil", "Bob", "Fil", "Jack"];
      *
@@ -264,7 +358,7 @@ define("base/enumerable", [], function() {
      */
     count: function(match, context) {
       var array = this,
-          len   = array.length,
+          len   = array.length >>> 0,
           i = 0,
           j = 0;
 
@@ -281,6 +375,8 @@ define("base/enumerable", [], function() {
       return j;
     }
   };
+
+  Enum.Enumerator.prototype.detect = Enum.Enumerator.prototype.find;
 
   Enum.Enumerator.provides = "enumerable";
 
@@ -311,7 +407,7 @@ define("base/enumerable", [], function() {
     if (collection === void 0) { // Empty List
       this.length = 0;
     } else if (collection.map !== void 0) { // Convert Array to List
-      var i = 0, l = collection.length;
+      var i = 0, l = collection.length >>> 0;
       for (; i < l; i++) this[i] = collection[i];
 
       this.length = l;
