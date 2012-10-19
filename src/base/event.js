@@ -70,6 +70,13 @@ define("base/event", [], function() {
     this.handlers = [];
 
     /**
+     * Before functions storage
+     *
+     * @type Array
+     */
+    this.befores = [];
+
+    /**
      * After functions storage
      *
      * @type Array
@@ -88,12 +95,30 @@ define("base/event", [], function() {
      * @param {Object|Event} event
      */
     handle: function(event) {
-      var handlers     = this.handlers,
-          options      = this.options,
-          compHandlers = [];
+      var options      = this.options,
+          befores      = this.befores,
+          beforesLen   = befores.length,
+          handlers     = this.handlers,
+          handlersLen  = handlers.length,
+          afters       = this.afters,
+          aftersLen    = afters.length,
+          compHandlers = [],
+          i = 0, j = 0, k = 0;
 
-      for (var i = 0, len = handlers.length; i < len; i++) {
-        var handler = handlers[i],
+      if (beforesLen > 0) {
+        while(i < beforesLen) {
+          var beforeHandler = befores[i++];
+
+          try {
+            beforeHandler.fn.call(beforeHandler.context, event);
+          } catch(e) {
+
+          }
+        }
+      }
+
+      for (; j < handlersLen; j++) {
+        var handler = handlers[j],
             returnValue;
 
         try {
@@ -117,15 +142,11 @@ define("base/event", [], function() {
       if (!event.defaultPrevented && options.defaultFn) options.defaultFn(event);
 
       if (!event.stopped) {
-        var afters       = this.afters,
-            aftersLength = afters.length;
-
         if (options.broadcast) baseEvent.fire(event.type, event);
 
-        if (aftersLength > 0) {
-          var j = 0;
-          while(j < aftersLength) {
-            var afterHandler = afters[j++];
+        if (aftersLen > 0) {
+          while(k < aftersLen) {
+            var afterHandler = afters[k++];
 
             try {
               afterHandler.fn.call(afterHandler.context, event);
@@ -255,6 +276,27 @@ define("base/event", [], function() {
     once: function(type, callback, context) {
       if (!this._events) EventTarget.call(this);
       return this.on(type, callback, context, true);
+    },
+
+    /**
+     * Add before callback
+     */
+    before: function(type, callback, context) {
+      if (!this._events) EventTarget.call(this);
+
+      if (!context) context = this;
+
+      var events  = this._events,
+          handler = { fn: callback, context: context };
+
+      if (!events[type]) events[type] = new EventListener(this._eventOptions);
+
+      events[type].befores.push(handler);
+
+      // Optimization - if target has no wildcarded events - don't try to fire it
+      if (type.indexOf("*") > -1) this._eventOptions.hasWildcard = true;
+
+      return this;
     },
 
     /**

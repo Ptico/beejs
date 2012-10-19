@@ -54,11 +54,25 @@ define(["base/event"], function(event) {
         expect(spy).to.be.calledOnce();
       });
 
-      it("should fire after callback", function() {
+      it("should fire before callback", function() {
         var spyTwo = sinon.spy();
 
         event.on("update", spy);
+        event.before("update", spyTwo);
+
+        event.fire("update");
+
+        expect(spy).to.be.called();
+        expect(spyTwo).to.be.called();
+        expect(spyTwo).to.be.calledBefore(spy);
+        event.off("update");
+      });
+
+      it("should fire after callback", function() {
+        var spyTwo = sinon.spy();
+
         event.after("update", spyTwo);
+        event.on("update", spy);
 
         event.fire("update");
 
