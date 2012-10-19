@@ -54,6 +54,14 @@ define(["base/util", "base/enumerable"], function(util, enumerable) {
         expect(result).to.be.equal(15);
       });
 
+      it("should reduce list with #reduceRight method", function() {
+        result = nums.reduceRight(function(sum, val) {
+          return sum + val.toString();
+        });
+
+        expect(result).to.be.equal("54321");
+      });
+
       it("should find element with #find method", function() {
         result = nums.find(function(val) {
           return val > 3;

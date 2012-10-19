@@ -27,7 +27,7 @@ define("base/enumerable", [], function() {
     each: function(fn, context) {
       var array = this,
           i = 0,
-          len = array.length >>> 0;
+          len = array.length;
 
       context = context || array;
 
@@ -58,7 +58,7 @@ define("base/enumerable", [], function() {
       var array = this,
           i = 0,
           j = 0,
-          len = array.length >>> 0,
+          len = array.length,
           iters = -~(len / num),
           k, res;
 
@@ -97,7 +97,7 @@ define("base/enumerable", [], function() {
      */
     map: function(fn, context) {
       var array  = this,
-          len    = array.length >>> 0,
+          len    = array.length,
           result = new array.constructor(),
           i      = 0;
 
@@ -124,7 +124,7 @@ define("base/enumerable", [], function() {
      */
     pluck: function(key) {
       var array  = this,
-          len    = array.length >>> 0,
+          len    = array.length,
           result = new array.constructor(),
           i      = 0;
 
@@ -148,7 +148,7 @@ define("base/enumerable", [], function() {
      * @param            [context] Context for using as `this` inside function
      */
     reduce: function(fn, initial, context) {
-      var array = this, i = 0, l = array.length >>> 0, curr;
+      var array = this, i = 0, len = array.length, curr;
 
       if (initial === void 0) {
         curr = array[0];
@@ -159,7 +159,7 @@ define("base/enumerable", [], function() {
 
       context = context || array;
 
-      while (i < l) {
+      while (i < len) {
         if (i in array) curr = fn.call(context, curr, array[i], i, array);
         ++i;
       }
@@ -167,7 +167,39 @@ define("base/enumerable", [], function() {
       return curr;
     },
 
-    reduceRight: function() {},
+    /**
+     * Produces single result from enum elements (from right-to-left)
+     *
+     * Function `fn` is invoked with three arguments: 
+     * - the value of the element, 
+     * - the index of the element, 
+     * - the enum object being traversed
+     *
+     * If `context` is not defined, current enum object will be bound as `this`
+     * 
+     * @param {Function} fn        Iterator function or key string
+     * @param            initial   Object to use as the first argument to the first call of the `fn`
+     * @param            [context] Context for using as `this` inside function
+     */
+    reduceRight: function(fn, initial, context) {
+      var array = this, len = array.length, i = len - 1, curr;
+
+      if (initial === void 0) {
+        curr = array[len - 1];
+        i--;
+      } else {
+        curr = initial;
+      }
+
+      context = context || array;
+
+      while (i >= 0) {
+        if (i in array) curr = fn.call(context, curr, array[i], i, array);
+        i--;
+      }
+
+      return curr;
+    },
 
     /**
      * Passes each entry in enum to function. Returns the first for which function result is not false
@@ -188,7 +220,7 @@ define("base/enumerable", [], function() {
      * @param            [context] Context for using as `this` inside function
      */
     find: function(fn, context) {
-      var array = this, i = 0, len = array.length >>> 0;
+      var array = this, i = 0, len = array.length;
 
       context = context || array;
 
@@ -217,7 +249,7 @@ define("base/enumerable", [], function() {
      */
     findAll: function(fn, context) {
       var array  = this,
-          len    = array.length >>> 0,
+          len    = array.length,
           result = new array.constructor(),
           i      = 0;
 
@@ -257,7 +289,7 @@ define("base/enumerable", [], function() {
      */
     sortBy: function(fn, context) {
       var array    = this,
-          len      = array.length >>> 0,
+          len      = array.length,
           sortable = new array.constructor(),
           i        = 0,
           isFn     = (fn.call !== void 0),
@@ -314,7 +346,7 @@ define("base/enumerable", [], function() {
     groupBy: function(fn, context) {
       var array  = this,
           i      = 0,
-          len    = array.length >>> 0,
+          len    = array.length,
           isFn   = (fn.call !== void 0),
           result = {};
 
@@ -358,7 +390,7 @@ define("base/enumerable", [], function() {
      */
     count: function(match, context) {
       var array = this,
-          len   = array.length >>> 0,
+          len   = array.length,
           i = 0,
           j = 0;
 
@@ -407,7 +439,7 @@ define("base/enumerable", [], function() {
     if (collection === void 0) { // Empty List
       this.length = 0;
     } else if (collection.map !== void 0) { // Convert Array to List
-      var i = 0, l = collection.length >>> 0;
+      var i = 0, l = collection.length;
       for (; i < l; i++) this[i] = collection[i];
 
       this.length = l;
