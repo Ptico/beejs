@@ -275,7 +275,7 @@ define("base/enumerable", [], function() {
      *     nums.reject(function(v) { return v > 2; }); //=> [1, 2]
      *
      * @param {Function} fn        Iterator function or key string
-     * @param            [context] Context for using as `this` inside functionz
+     * @param            [context] Context for using as `this` inside function
      */
     reject: function(fn, context) {
       var array  = this,
