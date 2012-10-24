@@ -2,7 +2,7 @@ define("base/enumerable", [], function() {
   "use strict";
 
   var Enum = {},
-      Enumerator;
+      List, Enumerator;
 
   Enum.Enumerator = function() {};
 
@@ -315,7 +315,7 @@ define("base/enumerable", [], function() {
     sortBy: function(fn, context) {
       var array    = this,
           len      = array.length,
-          sortable = new array.constructor(),
+          sortable = new Array(len),
           i        = 0,
           isFn     = (fn.call !== void 0),
           sorted;
@@ -445,12 +445,7 @@ define("base/enumerable", [], function() {
    * @class
    * @param {collection} Array to convert to List
    */
-  Enum.List = function(collection) {
-    if (arguments.length > 1) {
-      collection = arguments;
-      collection.map = true; // Hack
-    }
-
+  List = function(collection) {
     // Hide length from enums if possible
     if (Object.defineProperty !== void 0) {
       Object.defineProperty(this, "length", {
@@ -461,38 +456,28 @@ define("base/enumerable", [], function() {
       });
     }
 
-    if (collection === void 0) { // Empty List
-      this.length = 0;
-    } else if (collection.map !== void 0) { // Convert Array to List
-      var i = 0, l = collection.length;
-      for (; i < l; i++) this[i] = collection[i];
-
-      this.length = l;
-    } else if (collection % 1 === 0) { // List with predefined length
-      var len = parseInt(collection, 10);
-
-      for (var j=0; j < len; j++) {
-        this[j] = void 0;
-      }
-
-      this.length = j;
-    } else { // Single item in List: List("foo") => ["foo"]
-      this[0] = collection;
-      this.length = 1;
+    if (arguments.length === 1 && collection % 1 === 0) {
+      this.length = -1 < collection ? collection : this.push(collection);
+    } else if (arguments.length) {
+      this.push.apply(this, arguments);
     }
   };
 
   // Copy array prototype to List prototype
   var Copy = function() {};
   Copy.prototype = Array.prototype;
-  Enum.List.prototype = new Copy();
+  List.prototype = new Copy();
+
+  List.prototype.constructor = List;
 
   // Extend List prototype with Enumerator
   for (var meth in Enumerator) {
     if (meth !== "constructor") {
-      Enum.List.prototype[meth] = Enumerator[meth];
+      List.prototype[meth] = Enumerator[meth];
     }
   }
+
+  Enum.List = List;
 
   return Enum;
 });
