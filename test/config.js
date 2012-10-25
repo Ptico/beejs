@@ -4,7 +4,8 @@ requirejs.config({
   // Paths are relative to this
   baseUrl: '../src/',
   paths: {
-    'fixtures': '../test/fixtures'
+    'fixtures': '../test/fixtures',
+    'vendor': '../vendor'
   },
   use: {
     mocha: {
