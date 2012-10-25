@@ -104,9 +104,9 @@ define("base/enumerable", [], function() {
       context = context || array;
 
       if (fn.call !== void 0) {
-        for (; i < len; i++) result[i] = fn.call(context, array[i], i, array);
+        for (; i < len; i++) result.push(fn.call(context, array[i], i, array));
       } else {
-        for (; i < len; i++) result[i] = array[i][fn]();
+        while (i < len) result.push(array[i++][fn]());
       }
 
       return result;
@@ -128,7 +128,7 @@ define("base/enumerable", [], function() {
           result = new array.constructor(),
           i      = 0;
 
-      for (; i < len; i++) result[i] = array[i][key];
+      while (i < len) result.push(array[i++][key]);
 
       return result;
     },
