@@ -430,6 +430,38 @@ define("base/enumerable", [], function() {
       }
 
       return j;
+    },
+
+    /**
+     * Return first `n` elements.
+     * If no arguments given - return only one element
+     *
+     * @param {Number} n Quantity of elements which you can get
+     */
+    first: function(n) {
+      if (n !== void 0 && n % 1 === 0) {
+        var result = new this.constructor();
+        result.push.apply(result, this.slice(0, n));
+        return result;
+      } else {
+        return this[0];
+      }
+    },
+
+    /**
+     * Return last `n` elements.
+     * If no arguments given - return only one element
+     *
+     * @param {Number} n Quantity of elements which you can get
+     */
+    last: function(n) {
+      if (n !== void 0 && n % 1 === 0) {
+        var result = new this.constructor();
+        result.push.apply(result, this.slice(this.length - n));
+        return result;
+      } else {
+        return this[this.length - 1];
+      }
     }
   };
 

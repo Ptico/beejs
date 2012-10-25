@@ -112,6 +112,16 @@ define(["base/util", "base/enumerable"], function(util, enumerable) {
         expect(result).to.be.equal(2);
       });
 
+      it("should return first element(s)", function() {
+        expect(names.first()).to.be.equal("Ann");
+        expect(nums.first(3)).to.be.eql([1, 2, 3]);
+      });
+
+      it("should return last element(s)", function() {
+        expect(names.last()).to.be.equal("Jim");
+        expect(nums.last(2)).to.be.eql([4, 5]);
+      });
+
       it("should bind context to iterator", function() {
         var bound = { val: 2 };
 
