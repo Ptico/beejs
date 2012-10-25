@@ -27,7 +27,8 @@ module.exports = function( grunt ) {
       expr:     true,
       indent:   2,
       globals: {
-        define: true
+        define: true,
+        window: true
       }
     },
 
@@ -49,6 +50,9 @@ module.exports = function( grunt ) {
     mocha: {
       base: {
         src: ["test/base.html"]
+      },
+      browser: {
+        src: ["test/browser.html"]
       }
     },
 

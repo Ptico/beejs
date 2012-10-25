@@ -1,7 +1,9 @@
 define("browser/dom", ["base/enumerable", "vendor/finder"], function(enumerable, finder) {
   "use strict";
 
-  var dom, DOMMethods;
+  var dom, DOMMethods,
+      win = window,
+      doc = win.document;
 
   /**
    * Main DOM helper
@@ -26,7 +28,7 @@ define("browser/dom", ["base/enumerable", "vendor/finder"], function(enumerable,
       result = selector;
     }
 
-    return new Wrapper(result);
+    return new DOMWrapper(result);
   };
 
   /**
@@ -58,7 +60,7 @@ define("browser/dom", ["base/enumerable", "vendor/finder"], function(enumerable,
 
     if (nodes.nodeType) {
       nodes = [nodes];
-      len = 1
+      len = 1;
     }
 
     // Filter non-tag elements
@@ -72,7 +74,7 @@ define("browser/dom", ["base/enumerable", "vendor/finder"], function(enumerable,
     }
 
     this.push.apply(this, result);
-  };
+  }
 
   // Make DOMWrapper enumerable first (because we can't just copy Array prototype methods)
   var Copy = function() {};
