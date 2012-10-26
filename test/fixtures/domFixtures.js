@@ -3,9 +3,12 @@ define(function() {
       fixtures = {};
 
   /* HTML fixtures */
-  fixtures.wrapper = '<div id="first" class="one">One</div>\
+  fixtures.wrapper = '<div id="first" class="one">One</div>Hello\
     <div class="two"></div>&nbsp;<div class="three">Three</div><br>\
     <div id="last" class="five"></div>';
+
+  fixtures.selector = '<div class="one"></div><span class="one"></span>\
+    <button class="two" disabled>Press</button>';
 
   /* Helpers */
   fixture.fill = function(name) {

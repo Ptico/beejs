@@ -1,9 +1,19 @@
-define("browser/dom", ["base/enumerable", "vendor/finder"], function(enumerable, finder) {
+define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerable, selector) {
   "use strict";
 
   var dom, DOMMethods,
-      win = window,
-      doc = win.document;
+      finder = {},
+      win    = window,
+      doc    = win.document;
+
+  // Set selector engine
+  if (selector.name && selector.name === "Sizzle") { // Sizzle
+    finder.search = selector;
+  } else if (selector.search !== void 0) { // Slick
+    finder.search = function(stor, context, results) {
+      return selector.search(context, stor, results);
+    };
+  }
 
   /**
    * Main DOM helper
@@ -11,21 +21,21 @@ define("browser/dom", ["base/enumerable", "vendor/finder"], function(enumerable,
    *     dom(".special");
    *     dom(el.parent);
    *
-   * @param {String|DOMElement|DomWrapper} selector CSS-selector string or plain DOMElement or Wrapper object
+   * @param {String|DOMElement|DomWrapper} stor     CSS-selector string or plain DOMElement or Wrapper object
    * @param {DOMElement}                   context  Context for lookup
    *
    * @returns {Wrapper} Wrapped set of DOMElements
    */
-  dom = function(selector, context) {
-    if (selector.wrapped) return selector;
+  dom = function(stor, context) {
+    if (stor.wrapped) return selector;
 
     var result;
 
-    if (typeof selector === "string") {
+    if (typeof stor === "string") {
       if (!context) context = doc;
-      result = finder.search(context, selector);
-    } else if (selector.nodeType) {
-      result = selector;
+      result = finder.search(stor, context);
+    } else if (stor.nodeType) {
+      result = stor;
     }
 
     return new DOMWrapper(result);
@@ -51,12 +61,11 @@ define("browser/dom", ["base/enumerable", "vendor/finder"], function(enumerable,
     }
 
     if (!nodes) return;
+    if (nodes.wrapped) return nodes;
 
-    var i = 0,
-        len = nodes.length,
+    var i = 0, len = nodes.length,
         result = [],
-        node,
-        nodeType;
+        node, nodeType;
 
     if (nodes.nodeType) {
       nodes = [nodes];
@@ -93,6 +102,24 @@ define("browser/dom", ["base/enumerable", "vendor/finder"], function(enumerable,
   }
 
   dom.Wrapper = DOMWrapper;
+
+  /**
+   * Get element by id and wrap it with DOMWrapper
+   *
+   * Uses getElementById for lookup instead of more slower selector engine
+   *
+   *     dom.id("main");
+   *
+   * @param {String} id DOM identifier
+   */
+  dom.id = function(id) {
+    return new DOMWrapper(doc.getElementById(id));
+  };
+
+  /**
+   * Cached window.document
+   */
+  dom.root = new DOMWrapper(doc);
 
   return dom;
 });
