@@ -10,8 +10,11 @@ define(function() {
   fixtures.selector = '<div class="one"></div><span class="one"></span>\
     <button class="two" disabled>Press</button>';
 
+  fixtures.classes = '<div id="has-class" class="foo bar two-parts two_parts"></div>\
+    <div class="foo baz"></div>'
+
   /* Helpers */
-  fixture.fill = function(name) {
+  fixture.load = function(name) {
     var fixt = fixtures[name];
 
     document.getElementById("fixtures").innerHTML = fixt;

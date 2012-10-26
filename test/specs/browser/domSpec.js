@@ -2,7 +2,7 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
   describe("DOM", function() {
     describe("DOMWrapper", function() {
       beforeEach(function() {
-        fixtures.fill("wrapper");
+        fixtures.load("wrapper");
       });
 
       afterEach(fixtures.clear);
@@ -53,7 +53,7 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
       });
 
       it("should work fine with selector engine", function() {
-        fixtures.fill("selector");
+        fixtures.load("selector");
 
         expect(dom("div")).to.be.a(dom.Wrapper);
         expect(dom("[disabled]")[0].tagName.toLowerCase()).to.be.equal("button");
@@ -73,6 +73,35 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
       it("should cache window.document", function() {
         expect(dom.root).to.be.a(dom.Wrapper);
         expect(dom.root[0].nodeName).to.be.equal("#document");
+      });
+    });
+
+    describe("Classes", function() {
+      beforeEach(function() {
+        fixtures.load("classes");
+      });
+
+      afterEach(fixtures.clear);
+
+      it("should check for class name", function() {
+        var testOne = dom.id("has-class"),
+            testTwo = dom("#fixtures .foo");
+
+        expect(testOne.hasClass("foo")).to.be.ok();
+        expect(testOne.hasClass("bar")).to.be.ok();
+        expect(testOne.hasClass("two-parts")).to.be.ok();
+        expect(testOne.hasClass("two_parts")).to.be.ok();
+
+        expect(testOne.hasClass("fail")).to.not.be.ok();
+        expect(testOne.hasClass("oo")).to.not.be.ok();
+        expect(testOne.hasClass("two")).to.not.be.ok();
+        expect(testOne.hasClass("parts")).to.not.be.ok();
+
+        expect(testTwo.hasClass("foo")).to.be.ok();
+        expect(testTwo.hasClass("baz")).to.be.ok();
+        expect(testTwo.hasClass("two_parts")).to.be.ok();
+
+        expect(testTwo.hasClass("parts")).to.not.be.ok();
       });
     });
 

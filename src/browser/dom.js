@@ -4,7 +4,8 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
   var dom, DOMMethods,
       finder = {},
       win    = window,
-      doc    = win.document;
+      doc    = win.document,
+      spaceReg = /[\n\t\r]/g;
 
   // Set selector engine
   if (selector.name && selector.name === "Sizzle") { // Sizzle
@@ -93,6 +94,28 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
   // Define DOM functions
   DOMMethods = {
     constructor: DOMWrapper,
+
+    /* == Class operations == */
+
+    /**
+     * Check presence of class name in elements
+     *
+     *     dom("#example").hasClass("test");
+     *
+     * @param {String} className Class name to search
+     */
+    hasClass: function(className) {
+      className = " " + className + " ";
+
+      var len = this.length,
+          result = new Array(len);
+
+      for (var i = 0; i < len; i++) {
+        result[i] = this[i].className;
+      }
+
+      return (" " + result.join(" ") + " ").replace(spaceReg, " ").indexOf(className) > -1;
+    },
 
     wrapped: true
   };
