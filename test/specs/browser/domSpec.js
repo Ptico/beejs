@@ -76,6 +76,28 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
       });
     });
 
+    describe("Finder", function() {
+      beforeEach(function() {
+        fixtures.load("finder");
+      });
+
+      afterEach(fixtures.clear);
+
+      it("should find inside the previous result", function() {
+        var result = dom(".parent-one"),
+            subs   = result.find(".child");
+
+        expect(subs.length).to.be.equal(2);
+      });
+
+      it("should find inside the multiple results", function() {
+        var result = dom(".parent"),
+            subs   = result.find(".child");
+
+        expect(subs.length).to.be.equal(4);
+      });
+    });
+
     describe("Classes", function() {
       beforeEach(function() {
         fixtures.load("classes");

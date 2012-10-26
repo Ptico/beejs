@@ -95,6 +95,16 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
   DOMMethods = {
     constructor: DOMWrapper,
 
+    find: function(stor) {
+      var i = 0, len = this.length, result = [];
+
+      while (i < len) {
+        finder.search(stor, this[i++], result);
+      }
+
+      return new DOMWrapper(result);
+    },
+
     /* == Class operations == */
 
     /**

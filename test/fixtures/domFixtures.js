@@ -10,8 +10,16 @@ define(function() {
   fixtures.selector = '<div class="one"></div><span class="one"></span>\
     <button class="two" disabled>Press</button>';
 
+  fixtures.finder = '<div class="parent parent-one">\
+    <div class="child"></div>\
+    <div class="child"></div>\
+  </div><div class="parent parent-two">\
+    <div class="child"></div>\
+    <div class="child"></div>\
+  </div>';
+
   fixtures.classes = '<div id="has-class" class="foo bar two-parts two_parts"></div>\
-    <div class="foo baz"></div>'
+    <div class="foo baz"></div>';
 
   /* Helpers */
   fixture.load = function(name) {
