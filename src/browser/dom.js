@@ -127,6 +127,86 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       return (" " + result.join(" ") + " ").replace(spaceReg, " ").indexOf(className) > -1;
     },
 
+    /**
+     * Add class name(s) to each element
+     *
+     * TODO: optimize this method
+     *
+     *     dom("#example").addClass("foo");
+     *     dom("#example").addClass("foo bar");
+     *     dom("#example").addClass(["bar", "foo"]);
+     *     dom("#example").addClass("bar", "foo");
+     *
+     * @param {String|Array} className Class name, or array of class names or space-separated list of class names
+     */
+    addClass: function(className) {
+      var i = 0, len = this.length, cLen, names;
+
+      if (className instanceof Array) { // Array or Enumerable
+        names = className;
+      } else if (arguments.length > 1) { // Arguments list
+        names = arguments;
+      } else if (typeof(className) === "string") { // Single class name or space-separated list
+        names = className.split(" ");
+      } else return this; // Bullshit given
+
+      cLen = names.length;
+
+      while (i < len) {
+        var el = this[i++], j = 0, result = [],
+            classes = (" " + el.className + " ").replace(spaceReg, " ");
+
+        while (j < cLen) {
+          var val = names[j++], name = " " + val + " ";
+
+          if (classes.indexOf(name) === -1) result.push(val);
+        }
+
+        if (result.length > 0) el.className = (classes + result.join(" ")).slice(1);
+      }
+
+      return this;
+    },
+
+    /**
+     * Remove class name(s) from each element
+     *
+     *     dom("#example").removeClass("foo");
+     *     dom("#example").removeClass("foo bar");
+     *     dom("#example").removeClass(["bar", "foo"]);
+     *     dom("#example").removeClass("bar", "foo");
+     *
+     * @param {String|Array} className Class name, or array of class names or space-separated list of class names
+     */
+    removeClass: function(className) {
+      var i = 0, len = this.length, cLen, names;
+
+      if (className instanceof Array) { // Array or Enumerable
+        names = className;
+      } else if (arguments.length > 1) { // Arguments list
+        names = arguments;
+      } else if (typeof(className) === "string") { // Single class name or space-separated list
+        names = className.split(" ");
+      } else return this;
+
+      cLen = names.length;
+
+      while (i < len) {
+        var el = this[i++], j = 0,
+            classes = (" " + el.className + " ").replace(spaceReg, " ");
+
+        while (j < cLen) {
+          var val = names[j++], name = " " + val + " ";
+
+          classes = classes.replace(name, " ");
+        }
+
+        el.className = classes.slice(1, -1);
+      }
+
+      return this;
+    },
+
     wrapped: true
   };
 

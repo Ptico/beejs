@@ -99,6 +99,7 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
     });
 
     describe("Classes", function() {
+
       beforeEach(function() {
         fixtures.load("classes");
       });
@@ -124,6 +125,57 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
         expect(testTwo.hasClass("two_parts")).to.be.ok();
 
         expect(testTwo.hasClass("parts")).to.not.be.ok();
+      });
+
+      it("should add class name", function() {
+        var testOne = dom.id("has-class"),
+            testTwo = dom("#fixtures .foo");
+
+        testOne.addClass("boo");
+        testOne.addClass("bar");
+
+        testTwo.addClass("mult");
+
+        expect(testOne[0].className).to.be.equal("foo bar two-parts two_parts boo mult");
+        expect(testTwo[1].className).to.be.equal("foo baz mult");
+      });
+
+      it("should add class names", function() {
+        var testOne = dom.id("has-class"),
+            testTwo = dom("#fixtures .baz");
+
+        testOne.addClass("foo", "boo", "mult");
+        testTwo.addClass(["foo", "boo", "mult"]);
+        testTwo.addClass("xyz zyx");
+
+        expect(testOne[0].className).to.be.equal("foo bar two-parts two_parts boo mult");
+        expect(testTwo[0].className).to.be.equal("foo baz boo mult xyz zyx");
+      });
+
+      it("should remove class name", function() {
+        var testOne = dom.id("has-class"),
+            testTwo = dom("#fixtures .foo");
+
+        testOne.removeClass("two-parts");
+        testOne.removeClass("two_parts");
+
+        testTwo.removeClass("foo");
+        testTwo.removeClass("baz");
+
+        expect(testOne[0].className).to.be.equal("bar");
+        expect(testTwo[1].className).to.be.equal("");
+      });
+
+      it("should remove class names", function() {
+        var testOne = dom.id("has-class"),
+            testTwo = dom("#fixtures .foo");
+
+        testOne.removeClass("two-parts", "two_parts");
+
+        testTwo.removeClass("bar foo");
+
+        expect(testOne[0].className).to.be.equal("");
+        expect(testTwo[1].className).to.be.equal("baz");
       });
     });
 
