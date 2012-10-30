@@ -349,7 +349,20 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
         });
       });
 
-    });
+      describe("custom attribute", function() {
+        it("should configure custom attribute", function() {
+          dom.attribute("labelInput", {
+            get: function(el) {
+              var forId = el.htmlFor;
+
+              return dom.id(forId);
+            }
+          });
+
+          expect(dom.id("test-label").get("labelInput").get("name")).to.be.equal("username");
+        });
+      });
+    }); // Attribute
 
   });
 });

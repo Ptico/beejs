@@ -501,5 +501,21 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
    */
   dom.root = new DOMWrapper(doc);
 
+  /**
+   * Setup custom attribute
+   *
+   *     dom.attribute("broText", {
+   *       get: function(el) { return el.innerText + " bro!"; },
+   *       set: function(el, val) { el.innerText = "Bro, " + val; }
+   *       erase: function(el) { el.innerText = el.innerText.replace(/bro/i, ""); }
+   *     });
+   *
+   * @param {String} attr    Attribute name
+   * @param {Object} options Attibute getter/setter/eraser
+   */
+  dom.attribute = function(attr, options) {
+    customAttrs[attr] = options;
+  };
+
   return dom;
 });
