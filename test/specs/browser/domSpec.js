@@ -107,76 +107,248 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
       afterEach(fixtures.clear);
 
       it("should check for class name", function() {
-        var testOne = dom.id("has-class"),
-            testTwo = dom("#fixtures .foo");
+        var nodeOne = dom.id("has-class"),
+            nodeTwo = dom("#fixtures .foo");
 
-        expect(testOne.hasClass("foo")).to.be.ok();
-        expect(testOne.hasClass("bar")).to.be.ok();
-        expect(testOne.hasClass("two-parts")).to.be.ok();
-        expect(testOne.hasClass("two_parts")).to.be.ok();
+        expect(nodeOne.hasClass("foo")).to.be.ok();
+        expect(nodeOne.hasClass("bar")).to.be.ok();
+        expect(nodeOne.hasClass("two-parts")).to.be.ok();
+        expect(nodeOne.hasClass("two_parts")).to.be.ok();
 
-        expect(testOne.hasClass("fail")).to.not.be.ok();
-        expect(testOne.hasClass("oo")).to.not.be.ok();
-        expect(testOne.hasClass("two")).to.not.be.ok();
-        expect(testOne.hasClass("parts")).to.not.be.ok();
+        expect(nodeOne.hasClass("fail")).to.not.be.ok();
+        expect(nodeOne.hasClass("oo")).to.not.be.ok();
+        expect(nodeOne.hasClass("two")).to.not.be.ok();
+        expect(nodeOne.hasClass("parts")).to.not.be.ok();
 
-        expect(testTwo.hasClass("foo")).to.be.ok();
-        expect(testTwo.hasClass("baz")).to.be.ok();
-        expect(testTwo.hasClass("two_parts")).to.be.ok();
+        expect(nodeTwo.hasClass("foo")).to.be.ok();
+        expect(nodeTwo.hasClass("baz")).to.be.ok();
+        expect(nodeTwo.hasClass("two_parts")).to.be.ok();
 
-        expect(testTwo.hasClass("parts")).to.not.be.ok();
+        expect(nodeTwo.hasClass("parts")).to.not.be.ok();
       });
 
       it("should add class name", function() {
-        var testOne = dom.id("has-class"),
-            testTwo = dom("#fixtures .foo");
+        var nodeOne = dom.id("has-class"),
+            nodeTwo = dom("#fixtures .foo");
 
-        testOne.addClass("boo");
-        testOne.addClass("bar");
+        nodeOne.addClass("boo");
+        nodeOne.addClass("bar");
 
-        testTwo.addClass("mult");
+        nodeTwo.addClass("mult");
 
-        expect(testOne[0].className).to.be.equal("foo bar two-parts two_parts boo mult");
-        expect(testTwo[1].className).to.be.equal("foo baz mult");
+        expect(nodeOne[0].className).to.be.equal("foo bar two-parts two_parts boo mult");
+        expect(nodeTwo[1].className).to.be.equal("foo baz mult");
       });
 
       it("should add class names", function() {
-        var testOne = dom.id("has-class"),
-            testTwo = dom("#fixtures .baz");
+        var nodeOne = dom.id("has-class"),
+            nodeTwo = dom("#fixtures .baz");
 
-        testOne.addClass("foo", "boo", "mult");
-        testTwo.addClass(["foo", "boo", "mult"]);
-        testTwo.addClass("xyz zyx");
+        nodeOne.addClass("foo", "boo", "mult");
+        nodeTwo.addClass(["foo", "boo", "mult"]);
+        nodeTwo.addClass("xyz zyx");
 
-        expect(testOne[0].className).to.be.equal("foo bar two-parts two_parts boo mult");
-        expect(testTwo[0].className).to.be.equal("foo baz boo mult xyz zyx");
+        expect(nodeOne[0].className).to.be.equal("foo bar two-parts two_parts boo mult");
+        expect(nodeTwo[0].className).to.be.equal("foo baz boo mult xyz zyx");
       });
 
       it("should remove class name", function() {
-        var testOne = dom.id("has-class"),
-            testTwo = dom("#fixtures .foo");
+        var nodeOne = dom.id("has-class"),
+            nodeTwo = dom("#fixtures .foo");
 
-        testOne.removeClass("two-parts");
-        testOne.removeClass("two_parts");
+        nodeOne.removeClass("two-parts");
+        nodeOne.removeClass("two_parts");
 
-        testTwo.removeClass("foo");
-        testTwo.removeClass("baz");
+        nodeTwo.removeClass("foo");
+        nodeTwo.removeClass("baz");
 
-        expect(testOne[0].className).to.be.equal("bar");
-        expect(testTwo[1].className).to.be.equal("");
+        expect(nodeOne[0].className).to.be.equal("bar");
+        expect(nodeTwo[1].className).to.be.equal("");
       });
 
       it("should remove class names", function() {
-        var testOne = dom.id("has-class"),
-            testTwo = dom("#fixtures .foo");
+        var nodeOne = dom.id("has-class"),
+            nodeTwo = dom("#fixtures .foo");
 
-        testOne.removeClass("two-parts", "two_parts");
+        nodeOne.removeClass("two-parts", "two_parts");
 
-        testTwo.removeClass("bar foo");
+        nodeTwo.removeClass("bar foo");
 
-        expect(testOne[0].className).to.be.equal("");
-        expect(testTwo[1].className).to.be.equal("baz");
+        expect(nodeOne[0].className).to.be.equal("");
+        expect(nodeTwo[1].className).to.be.equal("baz");
       });
+    });
+
+    describe("Attributes", function() {
+      beforeEach(function() {
+        fixtures.load("attributes");
+      });
+
+      afterEach(fixtures.clear);
+
+      describe("getter", function() {
+        it("should get simple attributes", function() {
+          var nodeOne = dom.id("text-input");
+
+          expect(nodeOne.get("id")).to.be.equal("text-input");
+          expect(nodeOne.get("type")).to.be.equal("text");
+          expect(nodeOne.get("placeholder")).to.be.equal("User");
+          expect(nodeOne.get("name")).to.be.equal("username");
+        });
+
+        it("should get camelCased attributes", function() {
+          expect(dom.id("checkbox-checked").get("tabindex")).to.be.equal("2");
+        });
+
+        it("should get properties", function() {
+          var nodeOne = dom.id("test-label"),
+              nodeTwo = dom.id("inner-html");
+
+          expect(nodeOne.get("class")).to.be.equal("custom-label");
+          expect(nodeOne.get("for")).to.be.equal("text-input");
+          expect(nodeOne.get("text")).to.be.equal("User name");
+
+          expect(nodeTwo.get("html")).to.be.equal("<i>Inner</i>");
+        });
+
+        it("should get custom attributes", function() {
+          var nodeOne = dom.id("test-label"),
+              nodeTwo = dom.id("text-input");
+
+          expect(nodeOne.get("style")).to.be.equal("color: red;");
+          expect(nodeOne.get("tag")).to.be.equal("label");
+
+          expect(nodeTwo.get("value")).to.be.equal("ptico");
+        });
+
+        it("should get boolean attributes", function() {
+          var nodeOne = dom.id("checkbox-checked"),
+              nodeTwo = dom.id("checkbox-not-checked"),
+              nodeThree = dom("#select-input option");
+
+          expect(nodeOne.get("checked")).to.be.ok();
+          expect(nodeTwo.get("checked")).to.not.be.ok();
+
+          expect(nodeThree.eq(0).get("selected")).to.not.be.ok();
+          expect(nodeThree.eq(1).get("selected")).to.be.ok();
+
+          expect(nodeOne.get("readonly")).to.not.be.ok();
+          expect(nodeTwo.get("readonly")).to.be.ok();
+        });
+
+        it("should get value for button", function() {
+          expect(dom.id("button-input").get("value")).to.be.equal("Press me");
+        });
+
+        it("should get value for select", function() {
+          expect(dom.id("select-input").get("value")).to.be.equal("platinum");
+          expect(dom.id("select-multiple").get("value")).to.be.eql(["1", "3"]);
+        });
+      });
+
+      describe("setter", function() {
+        it("should set simple attributes", function() {
+          dom.id("text-input").set("placeholder", "Nickname");
+
+          expect(dom.id("text-input").get("placeholder")).to.be.equal("Nickname");
+        });
+
+        it("should set camelCased attributes", function() {
+          dom.id("checkbox-checked").set("tabindex", 3);
+
+          expect(dom.id("checkbox-checked").get("tabindex")).to.be.equal("3");
+        });
+
+        it("should set properties", function() {
+          dom.id("inner-html").set("html", "<b>Changed</b>");
+          dom.id("text-input").set("class", "hello world");
+          dom.id("test-label").set("for", "checkbox-checked");
+          dom.id("test-label").set("text", "Checkbox label");
+
+          expect(dom.id("inner-html").get("html")).to.be.equal("<b>Changed</b>");
+          expect(dom.id("text-input").hasClass("hello")).to.be.ok();
+          expect(dom.id("test-label").get("for")).to.be.equal("checkbox-checked");
+          expect(dom.id("test-label").get("text")).to.be.equal("Checkbox label");
+        });
+
+        it("should set custom attributes", function() {
+          var nodeOne = dom.id("text-input");
+
+          nodeOne.set("value", "Chuck");
+          nodeOne.set("style", "color: green;");
+
+          expect(dom.id("text-input").get("value")).to.be.equal("Chuck");
+          expect(dom.id("text-input").get("style")).to.be.equal("color: green;");
+        });
+
+        it("should set boolean attributes", function() {
+          dom.id("checkbox-checked").set("checked", false);
+          dom.id("text-input").set("readonly", true);
+
+          expect(dom.id("checkbox-checked").get("checked")).to.not.be.ok();
+          expect(dom.id("text-input").get("readonly")).to.be.ok();
+        });
+
+        it("should set value for buttons", function() {
+          dom.id("button-input").set("value", "Don't touch me");
+
+          expect(dom.id("button-input").get("value")).to.be.equal("Don't touch me");
+        });
+
+        it("should set value for select", function() {
+          dom.id("select-input").set("value", "member");
+          dom.id("select-multiple").set("value", ["1", "2"]);
+
+          expect(dom.id("select-input").get("value")).to.be.equal("member");
+          expect(dom.id("select-multiple").get("value")).to.be.eql(["1", "2"]);
+        });
+      });
+
+      describe("eraser", function() {
+        it("should erase simple attributes", function() {
+          dom.id("text-input").erase("placeholder");
+
+          expect(dom.id("text-input").get("placeholder")).to.be.equal("");
+        });
+
+        it("should erase camelCased attributes", function() {
+          dom.id("checkbox-checked").erase("tabindex");
+
+          expect(dom.id("checkbox-checked").get("tabindex")).to.be.equal("");
+        });
+
+        it("should erase properties", function() {
+          var nodeOne = dom.id("test-label"),
+              nodeTwo = dom.id("inner-html");
+
+          nodeOne.erase("class");
+          nodeOne.erase("for");
+          nodeOne.erase("text");
+
+          nodeTwo.erase("html");
+
+          nodeOne = dom.id("test-label");
+
+          expect(nodeOne.get("class")).to.be.equal("");
+          expect(nodeOne.get("for")).to.be.equal("");
+          expect(nodeOne.get("text")).to.be.equal("");
+
+          expect(dom.id("test-label").get("html")).to.be.equal("");
+        });
+
+        it("should erase custom properties", function() {
+          dom.id("test-label").erase("style");
+
+          expect(dom.id("test-label").get("style")).to.be.equal("");
+        });
+
+        it("should erase boolean attributes", function() {
+          dom.id("checkbox-checked").erase("checked");
+
+          expect(dom.id("checkbox-checked").get("checked")).to.not.be.ok();
+        });
+      });
+
     });
 
   });

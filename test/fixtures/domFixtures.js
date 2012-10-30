@@ -21,6 +21,22 @@ define(function() {
   fixtures.classes = '<div id="has-class" class="foo bar two-parts two_parts"></div>\
     <div class="foo baz"></div>';
 
+  fixtures.attributes = '<label for="text-input" id="test-label" class="custom-label" style="color: red;">User name</label>\
+    <input type="text" name="username" id="text-input" placeholder="User" value="ptico">\
+    <input type="checkbox" name="isAdmin" id="checkbox-checked" tabindex="2" checked>\
+    <input type="checkbox" name="isManager" id="checkbox-not-checked" readonly>\
+    <select name="role" id="select-input">\
+      <option value="member">Member</option>\
+      <option value="platinum" selected="selected">Platinum member</option>\
+    </select>\
+    <select name="" id="select-multiple" multiple>\
+      <option value="1" selected>One</option>\
+      <option value="2">Two</option>\
+      <option value="3" selected>Three</option>\
+    </select>\
+    <button id="button-input">Press me</button>\
+    <div id="inner-html"><i>Inner</i></div>';
+
   /* Helpers */
   fixture.load = function(name) {
     var fixt = fixtures[name];
