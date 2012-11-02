@@ -364,5 +364,135 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
       });
     }); // Attribute
 
+    describe("Traversing", function() {
+      beforeEach(function() {
+        fixtures.load("traversing");
+      });
+
+      afterEach(fixtures.clear);
+
+      it("should get all parents", function() {
+        var result = dom(".children-one").parents();
+
+        expect(result.eq(0).hasClass("parent-one")).to.be.ok();
+        expect(result.eq(1).get("id")).to.be.equal("grandparent");
+        expect(result.length).to.be.greaterThan(2);
+      });
+
+      it("should get num parents", function() {
+        var result = dom(".children-one").parents(2);
+
+        expect(result.length).to.be.equal(2);
+      });
+
+      it("should get first level childrens", function() {
+        var result = dom.id("grandparent").childrens();
+
+        expect(result.hasClass("parent")).to.be.ok();
+        expect(result.length).to.be.equal(2);
+      });
+
+      it("should get all siblings", function() {
+        var result = dom(".children-five").siblings();
+
+        expect(result.length).to.be.equal(4);
+      });
+
+      it("should get siblings witch matches selector", function() {
+        var result = dom(".children-five").siblings("div");
+
+        expect(result.length).to.be.equal(3);
+      });
+
+      it("should get first parent", function() {
+        var result = dom(".children-one").up();
+
+        expect(result.hasClass("parent-one")).to.be.ok();
+        expect(result.length).to.be.equal(1);
+      });
+
+      it("should get parent by index", function() {
+        var result = dom(".children-one").up(1);
+
+        expect(result.get("id")).to.be.equal("grandparent");
+      });
+
+      it("should get parent by selector", function() {
+        var result = dom(".children-one").up("#grandparent");
+
+        expect(result.get("id")).to.be.equal("grandparent");
+      });
+
+      it("should get first children", function() {
+        var result = dom.id("grandparent").down();
+
+        expect(result.hasClass("parent-one")).to.be.ok();
+      });
+
+      it("should get children by index", function() {
+        var result = dom.id("grandparent").down(1);
+
+        expect(result.hasClass("parent-two")).to.be.ok();
+      });
+
+      it("should get children of children by index", function() {
+        var result = dom.id("grandparent").down(1, 1);
+
+        expect(result.hasClass("children-four")).to.be.ok();
+      });
+
+      it("should get next sibling", function() {
+        var result = dom(".children-three").next();
+
+        expect(result.hasClass("children-four")).to.be.ok();
+      });
+
+      it("should get next sibling by index", function() {
+        var result = dom(".children-three").next(2);
+
+        expect(result.hasClass("children-six")).to.be.ok();
+      });
+
+      it("should get next sibling by selector", function() {
+        var result = dom(".children-three").next("div");
+
+        expect(result.hasClass("children-five")).to.be.ok();
+      });
+
+      it("should get next sibling by selector and index", function() {
+        var result = dom(".children-three").next("div", 1);
+
+        expect(result.hasClass("children-six")).to.be.ok();
+      });
+
+      it("should get previous sibling", function() {
+        var result = dom(".children-six").prev();
+
+        expect(result.hasClass("children-five")).to.be.ok();
+      });
+
+      it("should get previous sibling by index", function() {
+        var result = dom(".children-six").prev(2);
+
+        expect(result.hasClass("children-three")).to.be.ok();
+      });
+
+      it("should get previous sibling by selector", function() {
+        var result = dom(".children-five").prev("div");
+
+        expect(result.hasClass("children-three")).to.be.ok();
+      });
+
+      it("should get previous sibling by selector and index", function() {
+        var result = dom(".children-six").prev("div", 1);
+
+        expect(result.hasClass("children-three")).to.be.ok();
+      });
+
+      it("should determine index in tree", function() {
+        
+      });
+    });
+
   });
 });

@@ -37,6 +37,21 @@ define(function() {
     <button id="button-input">Press me</button>\
     <div id="inner-html"><i>Inner</i></div>';
 
+  fixtures.traversing = '\
+    <div id="grandparent">\
+      <div class="parent parent-one">\
+        <div class="children children-one"></div>\
+        <div class="children children-two"></div>\
+      </div>\
+      <div class="parent parent-two">\
+        <div class="children children-three"></div>\
+        <span class="children children-four"></span>\
+        <div class="children children-five"></div>\
+        <div class="children children-six"></div>\
+      </div>\
+    </div>\
+  ';
+
   /* Helpers */
   fixture.load = function(name) {
     var fixt = fixtures[name];

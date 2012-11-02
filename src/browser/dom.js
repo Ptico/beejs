@@ -2,7 +2,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
   "use strict";
 
   var dom, DOMMethods, inArray,
-      finder = {},
+      finder, matcher,
       yep    = true, // Try to save couple bytes :)
       win    = window,
       doc    = win.document,
@@ -28,11 +28,13 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
 
   // Set selector engine
   if (selector.name && selector.name === "Sizzle") { // Sizzle
-    finder.search = selector;
+    finder  = selector;
+    matcher = selector.matchesSelector;
   } else if (selector.search !== void 0) { // Slick
-    finder.search = function(stor, context, results) {
+    finder = function(stor, context, results) {
       return selector.search(context, stor, results);
     };
+    matcher = selector.match;
   }
 
   /**
@@ -53,7 +55,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
 
     if (typeof stor === "string") {
       if (!context) context = doc;
-      result = finder.search(stor, context);
+      result = finder(stor, context);
     } else if (stor.nodeType) {
       result = stor;
     }
@@ -243,6 +245,40 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     }
   };
 
+  function nodeCollect(arr, prop, last, num, stor) {
+    var result = new DOMWrapper(),
+        len = arr.length,
+        i = 0;
+
+    num = parseInt(num, 10) || 9000;
+
+    while (i < len) {
+      var j = 0,
+          newNode = arr[i++][prop];
+
+      while (newNode && j < num) {
+        var nodeType = newNode.nodeType;
+
+        if (nodeType === 9) break;
+        if (nodeType === 1) {
+          if (stor) {
+            if (matcher(newNode, stor)) {
+              if (!last || (num - 1 === j)) result.push(newNode);
+              j++;
+            }
+          } else {
+            if (!last || (num - 1 === j)) result.push(newNode);
+            j++;
+          }
+        }
+
+        newNode = newNode[prop];
+      }
+    }
+
+    return result;
+  }
+
   // Define DOM functions
   DOMMethods = {
     constructor: DOMWrapper,
@@ -258,7 +294,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       var i = 0, len = this.length, result = [];
 
       while (i < len) {
-        finder.search(stor, this[i++], result);
+        finder(stor, this[i++], result);
       }
 
       return new DOMWrapper(result);
@@ -472,6 +508,189 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
           }
         }
       }
+    },
+
+    /* == Traversing == */
+
+    /**
+     * Get all or `num` parents of the element
+     *
+     *     dom(".children").parents();
+     *     dom(".children").parents(3);
+     *
+     * @param {Number} [num] Number of result
+     */
+    parents: function(num) {
+      return nodeCollect(this, "parentNode", false, num);
+    },
+
+    /**
+     * Get first level childrens for each element
+     *
+     *     dom(".parent").childrens();
+     *     dom(".parent").childrens("li");
+     *
+     * @param {String} [stor] CSS-selector string
+     */
+    childrens: function(stor) {
+      stor = stor || "*";
+      return this.find("> " + stor);
+    },
+
+    /**
+     * Get all siblings or sibling matches CSS-selector string
+     *
+     *     dom("#example").siblings();
+     *     dom("#example").siblings(".tab");
+     *
+     * @param {String} [stor] CSS-selector string
+     */
+    siblings: function(stor) {
+      return this.up().childrens(stor);
+    },
+
+    /**
+     * Get first parent by condition for each element
+     *
+     * If condition is number - get (n)th parent
+     * If condition is css selector - get first parent that matches given selector
+     * If condition is not given - return just first parent
+     *
+     *     dom(".children").up();
+     *     dom(".children").up(2);
+     *     dom(".children").up(".grandparent");
+     *
+     * @param {Number|String} cond Number of parent or selector
+     */
+    up: function(cond) {
+      cond = cond || 0;
+
+      var type = typeof(cond);
+
+      if (type === "number") { // Get by number
+        return nodeCollect(this, "parentNode", true, cond + 1);
+      } else if (type === "string") {
+        var result = new DOMWrapper(),
+            arr = this,
+            len = arr.length,
+            i = 0;
+
+        while (i < len) {
+          var newNode = arr[i++].parentNode;
+
+          while (true) {
+            if (newNode.nodeType === 9) break;
+            if (newNode.nodeType === 1) {
+              if (matcher(newNode, cond)) {
+                result.push(newNode);
+                break;
+              }
+            }
+
+            if (!(newNode = newNode.parentNode)) break;
+          }
+        }
+
+        return result;
+      }
+    },
+
+    /**
+     * Get first or (n)th descendant
+     *
+     *     dom(".parent").down();
+     *     dom(".parent").down(2);
+     *     dom(".parent").down(1, 0, 2);
+     */
+    down: function() {
+      var result = new DOMWrapper(),
+          argLen = arguments.length,
+          domLen = this.length,
+          lastIndex,
+          i = 0,
+          args;
+
+      if (argLen > 0) {
+        args = arguments;
+      } else {
+        args = [0];
+        argLen = 1;
+      }
+
+      lastIndex = argLen - 1;
+
+      while (i < domLen) { // Iterate through DOM-Elements
+        var currNode = this[i++],
+            j = 0, childNodes, arg;
+
+        while (currNode && j < argLen) { // Iterate through arguments
+          childNodes = finder("> *", currNode);
+          arg = args[j];
+
+          currNode = childNodes[arg];
+
+          if (j === lastIndex) result.push(currNode); // Last argument
+          j++;
+        }
+      }
+
+      return result;
+    },
+
+    /**
+     * Get next sibling of each element
+     *
+     * If first argument is a CSS selector string - get next sibling matched by selector
+     * If first argument is a number - get next (n)th sibling
+     * If both arguments given - get next (n)th sibling matched by selector
+     *
+     *     dom("#example").next(); // Get next sibling
+     *     dom("#example").next(2); // Get third right sibling
+     *     dom("#example").next(".tab"); // Get next sibling with class `tab`
+     *     dom("#example").next(".tab", 2); // Get third right sibling with class `tab`
+     *
+     * @param {String|Number} [stor]  CSS-selector string or index in sibling list
+     * @param {Number}        [index] Index in siblings list
+     */
+    next: function(stor, index) {
+      if (typeof(stor) !== "string") {
+        index = stor;
+        stor = void 0;
+      }
+
+      if (index === void 0) {
+        index = 0;
+      }
+
+      return nodeCollect(this, "nextSibling", true, index + 1, stor);
+    },
+
+    /**
+     * Get previous sibling of each element
+     *
+     * If first argument is a CSS selector string - get previous sibling matched by selector
+     * If first argument is a number - get previous (n)th sibling
+     * If both arguments given - get previous (n)th sibling matched by selector
+     *
+     *     dom("#example").next(); // Get previous sibling
+     *     dom("#example").next(2); // Get third left sibling
+     *     dom("#example").next(".tab"); // Get previous sibling with class `tab`
+     *     dom("#example").next(".tab", 2); // Get third left sibling with class `tab`
+     *
+     * @param {String|Number} [stor]  CSS-selector string or index in sibling list
+     * @param {Number}        [index] Index in siblings list
+     */
+    prev: function(stor, index) {
+      if (typeof(stor) !== "string") {
+        index = stor;
+        stor = void 0;
+      }
+
+      if (index === void 0) {
+        index = 0;
+      }
+
+      return nodeCollect(this, "previousSibling", true, index + 1, stor);
     },
 
     wrapped: true
