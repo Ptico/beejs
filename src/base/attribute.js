@@ -29,6 +29,13 @@ define("base/attribute", ["base/util"], function(util) {
     },
 
     /**
+     * Erase all attribute
+     */
+    eraseAll: function(obj) {
+      obj._attrs = {};
+    },
+
+    /**
      * Get list of keys
      */
     keys: (function() {
@@ -198,6 +205,16 @@ define("base/attribute", ["base/util"], function(util) {
       if (!this._attrs) attrTarget.call(this);
 
       return this._attrStorage.erase(this, key);
+    },
+
+    /**
+     * Delete all attributes
+     *
+     */
+    eraseAll: function() {
+      if (!this._attrs) attrTarget.call(this);
+
+      return this._attrStorage.eraseAll(this);
     },
 
     validate: function() {},

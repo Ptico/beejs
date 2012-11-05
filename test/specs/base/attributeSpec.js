@@ -24,6 +24,14 @@ define(["base/attribute"], function(attr) {
         expect(obj.get("foo")).to.be.an("undefined");
       });
 
+      it("should erase all attributes", function() {
+        obj.set("foo", "bar");
+        obj.set("hello", "word");
+        obj.eraseAll();
+
+        expect(obj.keys()).to.be.eql({});
+      });
+
       it("should find keys", function() {
         obj.set("foo", "bar");
 
