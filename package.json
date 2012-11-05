@@ -5,7 +5,8 @@
   "dependencies": {},
   "devDependencies": {
     "grunt": "~0.3",
-    "grunt-mocha": "~0.1"
+    "grunt-mocha": "~0.1",
+    "connect": "~2.6"
   },
   "scripts": {
     "test": "grunt"

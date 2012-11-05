@@ -28,7 +28,9 @@ module.exports = function( grunt ) {
       indent:   2,
       globals: {
         define: true,
-        window: true
+        window: true,
+        escape: true,
+        unescape: true
       }
     },
 
@@ -57,7 +59,10 @@ module.exports = function( grunt ) {
     },
 
     // Configuration options for the "server" task.
-    server: {},
+    server: {
+      port: 8000,
+      base: '.'
+    },
 
     // Lists of files to be unit tested with Nodeunit, used by the "test" task.
     test: {},

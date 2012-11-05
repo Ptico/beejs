@@ -134,13 +134,14 @@ define("base/attribute", ["base/util"], function(util) {
     /**
      * Set attribute value
      *
-     * @param {String} key Attribute name
-     * @param          val Attribute value
+     * @param {String} key    Attribute name
+     * @param          val    Attribute value
+     * @param {Object} [opts] Attribute options
      */
-    set: function(key, val) {
+    set: function(key, val, opts) {
       if (!this._attrs) attrTarget.call(this);
 
-      var conf    = this._attrConfig[key] || {},
+      var conf    = this._attrConfig[key] || opts || {},
           options = this._attributeOptions;
 
       if (conf.type) val = util.convert(val, conf.type);
@@ -159,7 +160,7 @@ define("base/attribute", ["base/util"], function(util) {
         }
       }
 
-      this._attrTracking[key] = this.get(key);
+      this._attrTracking[key] = this.get(key, conf);
 
       if (conf.setter) val = conf.setter.call(this, val);
 
