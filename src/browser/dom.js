@@ -28,10 +28,10 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
   }
 
   // Set selector engine
-  if (selector.name && selector.name === "Sizzle") { // Sizzle
+  if ("matchesSelector" in selector) { // Sizzle
     finder  = selector;
     matcher = selector.matchesSelector;
-  } else if (selector.search !== void 0) { // Slick
+  } else if ("lookupPseudo" in selector) { // Slick
     finder = function(stor, context, results) {
       return selector.search(context, stor, results);
     };

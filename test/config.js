@@ -5,7 +5,8 @@ requirejs.config({
   baseUrl: '../src/',
   paths: {
     'fixtures': '../test/fixtures',
-    'vendor': '../vendor'
+    'vendor':   '../vendor',
+    'vendor/selector': '../vendor/selector.' + cssSelector
   },
   use: {
     mocha: {
