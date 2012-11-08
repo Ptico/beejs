@@ -922,13 +922,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     wrapped: true
   };
 
-  DOMMethods.remove = DOMMethods.destroy;
-  DOMMethods.clear  = DOMMethods.empty;
-
-  for (var meth in DOMMethods) {
-    DOMWrapper.prototype[meth] = DOMMethods[meth];
-  }
-
+  // Make wrapper available for public usage
   dom.Wrapper = DOMWrapper;
 
   /**
@@ -964,6 +958,34 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
   dom.attribute = function(attr, options) {
     customAttrs[attr] = options;
   };
+
+  /**
+   * Implement custom methods for DOM wrapper
+   *
+   *     dom.implement({
+   *       inspect: function() { this.each(function(el) { console.log(el); }); }
+   *     });
+   *
+   *     dom(".example").inspect(); // Will display all elements in the console
+   *
+   * @param {Object} methods List of methods where key is method name and value is a function
+   */
+  dom.implement = function(methods) {
+    for (var meth in methods) {
+      if (methods.hasOwnProperty(meth)) {
+        DOMWrapper.prototype[meth] = methods[meth];
+      }
+    }
+  };
+
+  // Implement basic DOM methods
+  dom.implement(DOMMethods);
+
+  // Setup synonyms
+  dom.implement({
+    remove: DOMMethods.destroy,
+    clear:  DOMMethods.empty
+  });
 
   return dom;
 });
