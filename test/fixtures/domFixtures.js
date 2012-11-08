@@ -52,6 +52,17 @@ define(function() {
     </div>\
   ';
 
+  fixtures.manipulations = '\
+    <div id="zero">\
+      <div id="one">\
+        <div id="three" class="inner"></div>\
+        <div id="four" class="inner"></div>\
+      </div>\
+    </div>\
+    <div id="two" class="outer"></div>\
+    <div id="five" class="outer"></div>\
+  ';
+
   /* Helpers */
   fixture.load = function(name) {
     var fixt = fixtures[name];

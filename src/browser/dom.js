@@ -7,6 +7,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       win    = window,
       doc    = win.document,
       spaceReg = /[\n\t\r]/g,
+      inserts = ["bottom", "top", "before", "after"],
       booleans, camels, attrParamFix, props, customAttrs;
 
   // IE compatible inArray
@@ -43,10 +44,10 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
    *     dom(".special");
    *     dom(el.parent);
    *
-   * @param {String|DOMElement|DomWrapper} stor     CSS-selector string or plain DOMElement or Wrapper object
-   * @param {DOMElement}                   context  Context for lookup
+   * @param {String|Node|DomWrapper} stor  CSS-selector string or plain DOM node or Wrapper object
+   * @param {Node}                   context  Context for lookup
    *
-   * @returns {Wrapper} Wrapped set of DOMElements
+   * @returns {Wrapper} Wrapped set of DOM nodes
    */
   dom = function(stor, context) {
     if (stor.wrapped) return selector;
@@ -64,9 +65,9 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
   };
 
   /**
-   * Wrapper for DOM elements
+   * Wrapper for DOM nodes
    *
-   * Wraps array of DOMElements to enumerable object with built-in DOM functions
+   * Wraps array of DOM nodes to enumerable object with built-in DOM functions
    *
    * @class
    * @param {Array} nodes Array of nodes
@@ -245,28 +246,24 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     }
   };
 
-  function nodeCollect(arr, prop, last, num, stor) {
+  function nodeCollect(nodes, prop, last, num, stor) {
     var result = new DOMWrapper(),
-        len = arr.length,
-        i = 0;
+        len = nodes.length,
+        i = 0, index;
 
     num = parseInt(num, 10) || 9000;
+    index = num - 1;
 
     while (i < len) {
       var j = 0,
-          newNode = arr[i++][prop];
+          newNode = nodes[i++][prop];
 
       while (newNode && j < num) {
         var nodeType = newNode.nodeType;
 
-        if (nodeType === 9) break;
+        if (nodeType === 9 || nodeType === 11) break;
         if (nodeType === 1) {
-          if (stor) {
-            if (matcher(newNode, stor)) {
-              if (!last || (num - 1 === j)) result.push(newNode);
-              j++;
-            }
-          } else {
+          if (stor && matcher(newNode, stor) || !stor) {
             if (!last || (num - 1 === j)) result.push(newNode);
             j++;
           }
@@ -279,9 +276,34 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     return result;
   }
 
-  // Define DOM functions
+  function parseHTML(string) {
+    var container = doc.createElement('div'),
+        fragment  = doc.createDocumentFragment(),
+        nodes;
+
+    container.innerHTML = string;
+    nodes = container.childNodes;
+    for (var i=0, l = nodes.length; i < l; i++) {
+      fragment.appendChild(nodes[0]);
+    }
+    container = null;
+    return fragment;
+  }
+
+  /////////////////////////////////////////////
+  /////////////////////////////////////////////
+  /////////// DOM WRAPPER METHODS /////////////
+  /////////////////////////////////////////////
+  /////////////////////////////////////////////
   DOMMethods = {
     constructor: DOMWrapper,
+
+
+    /*
+    ==========================================
+    ============ Common functions ============
+    ==========================================
+    */
 
     /**
      * Find elements by selector
@@ -312,7 +334,12 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       return new DOMWrapper(this[position]);
     },
 
-    /* == Class operations == */
+
+    /*
+    ==========================================
+    ============ Class operations ============
+    ==========================================
+    */
 
     /**
      * Check presence of class name in elements
@@ -414,7 +441,12 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       return this;
     },
 
-    /* == Attribute operations == */
+
+    /*
+    ==========================================
+    ========== Attribute operations ==========
+    ==========================================
+    */
 
     /**
      * Universal getter for attributes/properties
@@ -510,7 +542,12 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       }
     },
 
-    /* == Traversing == */
+
+    /*
+    ==========================================
+    =============== Traversing ===============
+    ==========================================
+    */
 
     /**
      * Get all or `num` parents of the element
@@ -550,6 +587,25 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     },
 
     /**
+     * Get index for the first element in collection
+     *
+     *     dom("#example").index();
+     *     dom("#example").index("li");
+     *
+     * @param {String} CSS-selector string
+     */
+    index: function(stor) {
+      var el = this[0],
+          wrapped = (this.length > 1) ? new DOMWrapper(el) : this,
+          siblings = wrapped.up().childrens(stor),
+          i = -1, len = siblings.length;
+
+      while (i++ < len) if (siblings[i] == el) return i;
+
+      return -1;
+    },
+
+    /**
      * Get first parent by condition for each element
      *
      * If condition is number - get (n)th parent
@@ -565,34 +621,32 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     up: function(cond) {
       cond = cond || 0;
 
-      var type = typeof(cond);
+      var byInd = typeof(cond) === "number",
+          result = new DOMWrapper(),
+          nodes = this,
+          len = nodes.length,
+          i = 0;
 
-      if (type === "number") { // Get by number
-        return nodeCollect(this, "parentNode", true, cond + 1);
-      } else if (type === "string") {
-        var result = new DOMWrapper(),
-            arr = this,
-            len = arr.length,
-            i = 0;
+      while (i < len) {
+        var newNode = nodes[i++],
+            j = 0;
 
-        while (i < len) {
-          var newNode = arr[i++].parentNode;
+        /*jshint boss:true */
+        while (newNode = newNode.parentNode) {
+          var type = newNode.nodeType;
+          if (type === 9 || type === 11) {
+            result.push(null);
+            break;
+          }
 
-          while (true) {
-            if (newNode.nodeType === 9) break;
-            if (newNode.nodeType === 1) {
-              if (matcher(newNode, cond)) {
-                result.push(newNode);
-                break;
-              }
-            }
-
-            if (!(newNode = newNode.parentNode)) break;
+          if ((byInd && cond === j++) || (!byInd && matcher(newNode, cond))) {
+            result.push(newNode);
+            break;
           }
         }
-
-        return result;
       }
+
+      return result;
     },
 
     /**
@@ -605,9 +659,10 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     down: function() {
       var result = new DOMWrapper(),
           argLen = arguments.length,
-          domLen = this.length,
-          lastIndex,
+          nodes  = this,
+          len = nodes.length,
           i = 0,
+          lastIndex,
           args;
 
       if (argLen > 0) {
@@ -619,8 +674,8 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
 
       lastIndex = argLen - 1;
 
-      while (i < domLen) { // Iterate through DOM-Elements
-        var currNode = this[i++],
+      while (i < len) { // Iterate through DOM-Elements
+        var currNode = nodes[i++],
             j = 0, childNodes, arg;
 
         while (currNode && j < argLen) { // Iterate through arguments
@@ -693,8 +748,182 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       return nodeCollect(this, "previousSibling", true, index + 1, stor);
     },
 
+
+    /*
+    ==========================================
+    ============ DOM Manipulation ============
+    ==========================================
+    */
+
+    /**
+     * Insert element(s) `before`, `after`, on `top` or to the `bottom` of the given collection
+     *
+     * Elements to insert can be given in four formats:
+     * * `String` - an HTML-string, which will be rendered
+     * * `Node` - plain DOM node
+     * * `DocumentFragment` - document fragment with nodes inside
+     * * `DOMWrapper` - wrapped result of work of this library
+     *
+     * IMPORTANT!
+     * To avoid ID collisions, if collection have more than one target element,
+     * existing node will be cloned and their ID will be removed. Otherwise,
+     * node will be just moved to the new place
+     *
+     * If only target element given - it will be appended by default
+     * If `where` is a string and `insertion` is an element - `insertion` will be inserted to the `where` position
+     * If `where` is an object - it will be processed as list where key is position and value is element to insert
+     *
+     *     dom("#example").insert("top", "<h1>This is a header<h1>"); // Prepend node
+     *     dom("#example").insert("bottom", dom(".footer")); // Append node
+     *     dom("#example").insert("before", document.createElement("div")); // Insert element before the target
+     *     dom("#example").insert("after", docFragmentWithEls); // Insert element after the target
+     *
+     *     dom("#example").insert(dom(".footer")); // Append element
+     *     dom("#example").insert({ top: "<h1>Hello</h1>", after: "" }); // Mass insert
+     *
+     * @param {String|Object} where Place to insert the element or list of insertions
+     * @param {Node|DOMWrapper|Node|DocumentFragment} [insertion] Element to insert to collection
+     */
+    insert: function(where, insertion) {
+      var objs = {}, nodes = this,
+          whereType = typeof(where),
+          i = nodes.length, j = 4,
+          multInsert = i > 1,
+          insTypes = [], insTypesLen;
+
+      if (insertion === void 0) {
+        if (where.wrapped || where.nodeType || whereType === "string") {
+          objs = { 'bottom': where };
+        } else if (whereType === "object") {
+          objs = where;
+        } else return this;
+      } else if (whereType === "string") {
+        objs[where] = insertion;
+      } else return this;
+
+      while (j--) { // Normalize insertions
+        var key = inserts[j],
+            ins = objs[key];
+
+        if (ins) {
+          if (ins.wrapped) {
+            if (multInsert) ins.clean(true);
+
+            objs[key] = ins.toFragment();
+          } else if (typeof(ins) === "string") {
+            objs[key] = parseHTML(ins);
+          }
+
+          insTypes.push(key);
+        }
+      }
+
+      insTypesLen = insTypes.length;
+
+      while (i--) {
+        var el = nodes[i],
+            k = insTypesLen;
+
+        while (k--) {
+          var type = insTypes[k],
+              fragment = multInsert ? objs[type].cloneNode(true) : objs[type],
+              parent;
+
+          if (type === "before") {
+            parent = el.parentNode;
+            if (parent) parent.insertBefore(fragment, el);
+          } else if (type === "after") {
+            parent = el.parentNode;
+            if (parent) parent.insertBefore(fragment, el.nextSibling);
+          } else if (type === "bottom") {
+            el.appendChild(fragment);
+          } else { // top
+            el.insertBefore(fragment, el.firstChild);
+          }
+        }
+      }
+
+      return this;
+    },
+
+    empty: function() {
+      var nodes = this, i = nodes.length;
+
+      while (i--) {
+        nodes[i].innerHTML = "";
+      }
+
+      return this;
+    },
+
+    /**
+     * Destroy all elements in collection
+     *
+     *     dom(".example").destroy();
+     *     dom(".example").remove();
+     */
+    destroy: function() {
+      var el;
+
+      /*jshint boss:true */
+      while (el = this.shift()) {
+        var parent = el.parentNode;
+
+        if (parent) parent.removeChild(el);
+      }
+
+      return this;
+    },
+
+
+    /*
+    ==========================================
+    =============== Internals ================
+    ==========================================
+    */
+
+    clone: function(deep) {
+      var nodes = this,
+          i = nodes.length, result = new DOMWrapper(i);
+
+      while (i--) result[i] = nodes[i].cloneNode(deep);
+
+      result.clean(deep);
+
+      return result;
+    },
+
+    clean: function(deep) {
+      var nodes = this, i = nodes.length;
+
+      while (i--) {
+        var el = nodes[i],
+            type = el.type;
+
+        if (type === "checkbox" || type === "radio") el.defaultChecked = el.checked; // IE 7
+
+        el.removeAttribute("id");
+      }
+
+      if (deep) this.find("[id], input").clean();
+
+      return this;
+    },
+
+    toFragment: function() {
+      var nodes = this, i = 0, len = nodes.length,
+          result = doc.createDocumentFragment();
+
+      while (i < len) result.appendChild(nodes[i++]);
+
+      return result;
+    },
+
     wrapped: true
   };
+
+  DOMMethods.remove = DOMMethods.destroy;
+  DOMMethods.clear  = DOMMethods.empty;
 
   for (var meth in DOMMethods) {
     DOMWrapper.prototype[meth] = DOMMethods[meth];

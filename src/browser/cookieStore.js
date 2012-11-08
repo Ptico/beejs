@@ -69,7 +69,7 @@ define("browser/cookieStore", [], function() {
     },
 
     /**
-     * Erase all attribute
+     * Erase all attributes
      */
     eraseAll: function(obj) {
       var res = cookieStore.keys();

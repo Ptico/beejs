@@ -490,7 +490,101 @@ define(["browser/dom", "fixtures/domFixtures"], function(dom, fixtures) {
       });
 
       it("should determine index in tree", function() {
-        
+        var result = dom(".children-five").index();
+
+        expect(result).to.be.equal(2);
+      });
+    });
+
+    describe("Manipulations", function() {
+      var nodeOne, nodeTwo;
+
+      beforeEach(function() {
+        fixtures.load("manipulations");
+
+        nodeOne = dom.id("one");
+        nodeTwo = dom.id("two");
+      });
+
+      afterEach(fixtures.clear);
+
+      it("should append element", function() {
+        nodeOne.insert("bottom", nodeTwo);
+      
+        expect(nodeTwo.prev().get("id")).to.be.equal("four");
+      });
+      
+      it("should prepend element", function() {
+        nodeOne.insert("top", nodeTwo);
+      
+        expect(nodeTwo.next().get("id")).to.be.equal("three");
+      });
+      
+      it("should insert element before", function() {
+        nodeOne.insert("before", nodeTwo);
+      
+        expect(nodeTwo.next().get("id")).to.be.equal("one");
+      });
+      
+      it("should insert element after", function() {
+        nodeOne.insert("after", nodeTwo);
+      
+        expect(nodeTwo.prev().get("id")).to.be.equal("one");
+      });
+      
+      it("should insert html string", function() {
+        nodeOne.insert("top", '<div id="new"></div>');
+      
+        expect(nodeOne.down().get("id")).to.be.equal("new");
+      });
+      
+      it("should insert multiple elements", function() {
+        nodeTwo.insert("top", dom(".inner"));
+      
+        expect(nodeOne.childrens().length).to.be.equal(0);
+        expect(nodeTwo.childrens().length).to.be.equal(2);
+        expect(nodeTwo.down().get("id")).to.be.equal("three");
+      });
+
+      it("should insert multiple elements to multiple elements", function() {
+        dom(".outer").insert("top", dom(".inner"));
+
+        expect(nodeOne.childrens().length).to.be.equal(0);
+        expect(nodeTwo.childrens().length).to.be.equal(2);
+        expect(dom("#five").childrens().length).to.be.equal(2);
+        expect(nodeTwo.down().hasClass("inner")).to.be.ok();
+        expect(dom("#five").down().hasClass("inner")).to.be.ok();
+      });
+
+      it("should work with complex inserting", function() {
+        nodeOne.insert({ top: nodeTwo, after: dom("#five") });
+
+        expect(nodeOne.down().get("id")).to.be.equal("two");
+        expect(nodeOne.next().get("id")).to.be.equal("five");
+      });
+
+      it("should destroy all elements childrens", function() {
+        nodeOne.empty();
+
+        expect(dom("#one").childrens().length).to.be.equal(0);
+      }); // .empty(), .clean()
+
+      it("should destroy element", function() {
+        nodeOne.destroy();
+
+        expect(dom("#zero").childrens().length).to.be.equal(0);
+      });
+
+      it("should destroy element with #remove shortcut", function() {
+        nodeOne.remove();
+
+        expect(dom("#zero").childrens().length).to.be.equal(0);
+      });
+
+      it("should destroy elements", function() {
+        dom(".inner").destroy();
+
+        expect(dom("#one").childrens().length).to.be.equal(0);
       });
     });
 
