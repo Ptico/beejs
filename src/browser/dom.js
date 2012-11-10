@@ -978,6 +978,9 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     }
   };
 
+  dom.finder = finder;
+  dom.matcher = matcher;
+
   // Implement basic DOM methods
   dom.implement(DOMMethods);
 
