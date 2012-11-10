@@ -5,7 +5,8 @@ define("browser/event", ["browser/dom"], function(dom) {
       doc  = win.document,
       html = doc.documentElement,
       body = doc.body,
-      ael  = ("addEventListener" in body);
+      ael  = ("addEventListener" in body),
+      console = win.console;
 
   function createEventHandler(element, delegate) {
     return function(event) {
@@ -81,7 +82,7 @@ define("browser/event", ["browser/dom"], function(dom) {
     if (ael) {
       element.removeEventListener(type, element.eventHandler, false);
     } else {
-      element.detachEvent("on" + type, element.eventHandler)
+      element.detachEvent("on" + type, element.eventHandler);
     }
   }
 
@@ -110,7 +111,7 @@ define("browser/event", ["browser/dom"], function(dom) {
 
       while (i--) {
         var el = nodes[i],
-            handler = { fn: callback, context: context || el }
+            handler = { fn: callback, context: context || el };
 
         if (once) handler.once = true;
 
@@ -126,7 +127,7 @@ define("browser/event", ["browser/dom"], function(dom) {
             el.attachEvent("on" + type, el.eventHandler);
           }
         } else {
-          el.events[type].push(handler)
+          el.events[type].push(handler);
         }
       }
 
@@ -160,12 +161,12 @@ define("browser/event", ["browser/dom"], function(dom) {
             event;
 
         if (ael) {
-          event = document.createEvent('HTMLEvents');
+          event = doc.createEvent('HTMLEvents');
           event.eventName = type;
           event.initEvent(type, true, true);
           el.dispatchEvent(event);
         } else {
-          event = document.createEventObject();
+          event = doc.createEventObject();
 
           el.fireEvent("on" + type, event);
         }
