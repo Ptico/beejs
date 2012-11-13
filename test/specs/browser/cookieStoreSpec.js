@@ -55,5 +55,14 @@ define(["base/attribute", "browser/cookieStore"], function(attr, cookieStore) {
       expect(result.b).to.be.equal(2);
     });
 
+    xit("should store array", function() { // Disabled because of PhantomJS bug
+      cook.set("foo", [1, 2, 3]);
+
+      var result = cook.get("foo");
+
+      expect(result).to.be.equal([1, 2, 3]);
+      expect(result[2]).to.be.equal(3);
+    });
+
   });
 });
