@@ -243,7 +243,15 @@ define("browser/event", ["browser/dom"], function(dom) {
     }
   };
 
-  dom.load = function(callback, context) {
+  /**
+   * Add listeners which will be executed when the DOM-Structure is ready
+   *
+   *     dom.ready(function() { alert("DOM is ready"); });
+   *
+   * @param {Function} callback  Callback function to add
+   * @param {Object}   [context] Context for using as `this` in callback
+   */
+  dom.ready = function(callback, context) {
     if (domLoaded) {
       callback.call(context || doc);
       return;
