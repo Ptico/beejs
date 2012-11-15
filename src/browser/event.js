@@ -20,7 +20,7 @@ define("browser/event", ["browser/dom"], function(dom) {
     };
   }
 
-  function fixFacade(event, element) {
+  function fixEvent(event, element) {
     event = event || win.event;
 
     if (!event.target) event.target = event.srcElement || element; // IE 7/8
@@ -46,7 +46,7 @@ define("browser/event", ["browser/dom"], function(dom) {
   }
 
   function dispatchEvent(event, element, delegate) {
-    fixFacade(event, element);
+    fixEvent(event, element);
 
     var target = event.target;
 
@@ -120,6 +120,7 @@ define("browser/event", ["browser/dom"], function(dom) {
             handler = { fn: callback, context: context || el };
 
         if (once) handler.once = true;
+        if (delegate) handler.delegate = delegate;
 
         if (!el.events) el.events = {};
         if (!el.eventHandler) el.eventHandler = createEventHandler(el, delegate);
@@ -149,7 +150,11 @@ define("browser/event", ["browser/dom"], function(dom) {
      * @param {Function} callback Listener function to add
      */
     once: function(type, callback, context) {
-      return this.on(type, callback, context, true);
+      if (typeof(callback) === "string") {
+        return this.on(type, callback, context, arguments[4], true);
+      } else {
+        return this.on(type, callback, context, true);
+      }
     },
 
     /**
@@ -189,22 +194,38 @@ define("browser/event", ["browser/dom"], function(dom) {
      *
      *     dom(".example").off("click", doSmthng);
      *     dom(".example").off("click");
+     *     dom("#main").off("click", ".example", doSmthngDelegated);
+     *     dom("#main").off("click", ".example");
      *
      * @param {String}   type       Event name
      * @param {Function} [callback] Callback to detach
      */
     off: function(type, callback) {
-      var nodes = this, i = nodes.length;
+      var nodes = this, i = nodes.length, delegate = false;
+
+      if (typeof(callback) === "string") {
+        delegate = callback;
+        callback = arguments[2];
+      }
 
       while (i--) {
-        var el = nodes[i],
-            events = el.events;
+        var el = nodes[i], events = el.events;
 
         if (events && events[type]) {
-          if (callback) {
-            var handlers = events[type], j = handlers.length;
+          var handlers = events[type], j = handlers.length;
 
-            while (j--) if (handlers[j].fn === callback) handlers.splice(j, 1);
+          if (callback) {
+            while (j--) {
+              var handler = handlers[j];
+
+              if (handler.fn === callback) {
+                if (delegate && handler.delegate === delegate || !delegate) handlers.splice(j, 1);
+              }
+            }
+
+            if (handlers.length < 1) unloadEvent(el, type);
+          } else if (delegate) {
+            while (j--) if (handlers[j].delegate === delegate) handlers.splice(j, 1);
 
             if (handlers.length < 1) unloadEvent(el, type);
           } else {

@@ -63,6 +63,19 @@ define(function() {
     <div id="five" class="outer"></div>\
   ';
 
+  fixtures.events = '\
+    <div id="test-delegation">\
+      <a href="/test/1" class="test-link">Test link</a>\
+      <input type="text" class="test-input">\
+      <span id="span-1" class="test-span">One</span>\
+      <span id="span-2" class="test-span">Two</span>\
+      <select name="" class="test-select">\
+        <option value="1">Option 1</option>\
+        <option value="2">Option 2</option>\
+      </select>\
+    </div>\
+  ';
+
   /* Helpers */
   fixture.load = function(name) {
     var fixt = fixtures[name];
