@@ -48,7 +48,7 @@ define("browser/cookieStore", [], function() {
         if (curr.substring(0, keyLen) === keyStr) {
           var val = curr.substring(keyLen, curr.length);
 
-          if (val.substring(0, 1) === "{") {
+          if (val.substring(0, 1) === "{" || val.substring(0, 1) === "[") {
             return JSON.parse(val);
           } else if (val === "undefined") {
             return void 0;
