@@ -6,7 +6,13 @@ define("browser/event", ["browser/dom"], function(dom) {
       html = doc.documentElement,
       body = doc.body,
       ael  = ("addEventListener" in body),
-      console = win.console;
+      console   = win.console,
+      // DomLoad
+      domLoaded = false,
+      domLoadCallbacks = [],
+      domLoadHandler,
+      domLoadInterval,
+      domLoadCallbacksAttached = false;
 
   function createEventHandler(element, delegate) {
     return function(event) {
@@ -211,6 +217,72 @@ define("browser/event", ["browser/dom"], function(dom) {
     }
 
   });
+
+  domLoadHandler = function() {
+    if (!domLoaded) {
+      var len = domLoadCallbacks.length, i = 0;
+
+      if (ael) {
+        doc.removeEventListener("DOMContentLoaded", domLoadHandler, false);
+        win.removeEventListener("load", domLoadHandler, false);
+      } else win.detachEvent("onload", domLoadHandler);
+
+      if (domLoadInterval) clearInterval(domLoadInterval);
+
+      while (i < len) {
+        var handler = domLoadCallbacks[i++];
+
+        try {
+          handler.fn.call(handler.context);
+        } catch(e) {
+          if (console && console.error) console.error(e.stack || e.message || e);
+        }
+      }
+
+      domLoaded = true;
+    }
+  };
+
+  dom.load = function(callback, context) {
+    if (domLoaded) {
+      callback.call(context || doc);
+      return;
+    }
+
+    domLoadCallbacks.push({ fn: callback, context: context });
+
+    // Check if document REALLY complete (IE enters "interactive" mode to early). Thnx @mikesherov
+    if (doc.readyState === "complete" ||
+        (!doc.attachEvent && doc.readyState === "interactive")) setTimeout(domLoadHandler, 1);
+
+    if (!domLoadCallbacksAttached) {
+      if (ael) {
+        doc.addEventListener("DOMContentLoaded", domLoadHandler, false);
+        win.addEventListener("load", domLoadHandler, false);
+      } else {
+        var testDiv, isTop = false;
+
+        win.attachEvent("onload", domLoadHandler);
+
+        testDiv = doc.createElement('div');
+
+        try {
+          isTop = win.frameElement === null;
+        } catch (e) {}
+
+        if (testDiv.doScroll && isTop && window.external) {
+          domLoadInterval = setInterval(function() {
+            try {
+              testDiv.doScroll();
+              domLoadHandler();
+            } catch (e) {}
+          }, 30);
+        }
+      }
+
+      domLoadCallbacksAttached = true;
+    }
+  };
 
   return dom;
 });

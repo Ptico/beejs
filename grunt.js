@@ -30,7 +30,10 @@ module.exports = function( grunt ) {
         define: true,
         window: true,
         escape: true,
-        unescape: true
+        unescape: true,
+        setTimeout: true,
+        setInterval: true,
+        clearInterval: true
       }
     },
 
