@@ -50,7 +50,7 @@ define("browser/net", ["base/promise"], function(Promise) {
     contentTypes[options.name] = contentType;
   };
 
-  function setParams(url, params) {
+  function setUrlParams(url, params) {
     if (url.indexOf(":") === -1) return url;
 
     var keys = url.match(paramsReg),
@@ -61,8 +61,8 @@ define("browser/net", ["base/promise"], function(Promise) {
           keyStr = key.substring(1);
 
       if (keyStr in params) {
-        url = url.replace(key, params[key]);
-        delete params[key];
+        url = url.replace(key, params[keyStr]);
+        delete params[keyStr];
       }
     }
 
@@ -115,10 +115,25 @@ define("browser/net", ["base/promise"], function(Promise) {
   Request.prototype = {
 
     /* Promise proxy */
-    on: function() {},
-    done: function(fn) { this.promise.done(fn); },
-    fail: function(fn) { this.promise.fail(fn); },
-    anyway: function(fn) { this.promise.anyway(fn); },
+    on: function(state, fn, context) {
+      this.promise[state](fn, context || this);
+      return this;
+    },
+
+    done: function(fn, context) {
+      this.promise.done(fn, context || this);
+      return this;
+    },
+
+    fail: function(fn, context) {
+      this.promise.fail(fn, context || this);
+      return this;
+    },
+
+    anyway: function(fn, context) {
+      this.promise.anyway(fn, context || this);
+      return this;
+    },
 
     /* Set options */
     set: function(key, value) {
@@ -127,13 +142,26 @@ define("browser/net", ["base/promise"], function(Promise) {
       } else {
         this.options[key] = value;
       }
+
+      return this;
+    },
+
+    setData: function(key, value) {
+      if (typeof(key) === "object") {
+        for (var k in key) {
+          if (key.hasOwnProperty(k)) {
+            this.data[k] = key[k];
+          }
+        }
+      } else {
+        this.data[key] = value;
+      }
+
+      return this;
     },
 
     /* Set header */
     header: function() {},
-    setData: function(key, value) {
-      this.data[key] = value;
-    },
 
     addTarget: function() {},
 
@@ -143,7 +171,7 @@ define("browser/net", ["base/promise"], function(Promise) {
           type = this.type,
           opts = this.options,
           data = this.data,
-          url  = setParams(this.path, data),
+          url  = setUrlParams(this.path, data),
           prevState;
 
       if (opts.emulate && type !== "GET" && type !== "POST") {
@@ -177,7 +205,7 @@ define("browser/net", ["base/promise"], function(Promise) {
         prevState = readyState;
       };
 
-      xhr.open(this.type.toUpperCase(), url, true);
+      xhr.open(type, url, true);
 
       try {
         xhr.send(data);
