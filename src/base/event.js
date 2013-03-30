@@ -188,7 +188,7 @@ define("base/event", [], function() {
    */
   EventTarget = function(options) {
     this._events = {};
-    this._eventOptions = (options || this._eventOptions || {}); // TODO - check eventOptions read/rewrite
+    this._eventOptions = (options || this.prototype._eventOptions || {}); // TODO - check eventOptions read/rewrite
     this._eventTargets = [];
     this._eventDeferred = {};
   };
