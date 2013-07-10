@@ -78,7 +78,7 @@ define("base/attribute", ["base/util"], function(util) {
     var opts;
 
     this._attrs = this._attrs || {};
-    this._attributeOptions = opts = (options || this.prototype._attributeOptions || {});
+    this._attributeOptions = opts = (options || this.__proto__._attributeOptions || {});
     this._attrStorage      = opts.storage || defaultStorage;
     this._attrConfig       = {};
     this._attrTracking     = {};
