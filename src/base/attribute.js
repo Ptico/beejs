@@ -38,26 +38,9 @@ define("base/attribute", ["base/util"], function(util) {
     /**
      * Get list of keys
      */
-    keys: (function() {
-      if ("keys" in Object) {
-        return function(obj) {
-          return Object.keys(obj._attrs);
-        };
-      } else {
-        return function(obj) {
-          var keys = [],
-              attrs = obj._attrs;
-
-          for (var key in attrs) {
-            if (attrs.hasOwnProperty(key)) {
-              keys.push(attrs[key]);
-            }
-          }
-
-          return keys;
-        };
-      }
-    })()
+    keys: function(obj) {
+      return Object.keys(obj._attrs);
+    }
   };
 
   /**
@@ -78,7 +61,7 @@ define("base/attribute", ["base/util"], function(util) {
     var opts;
 
     this._attrs = this._attrs || {};
-    this._attributeOptions = opts = (options || this.__proto__._attributeOptions || {});
+    this._attributeOptions = opts = (options || {});
     this._attrStorage      = opts.storage || defaultStorage;
     this._attrConfig       = {};
     this._attrTracking     = {};

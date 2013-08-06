@@ -479,14 +479,12 @@ define("base/enumerable", [], function() {
    */
   List = function(collection) {
     // Hide length from enums if possible
-    if (Object.defineProperty !== void 0) {
-      Object.defineProperty(this, "length", {
-        writable: true,
-        enumerable: false,
-        configurable: false,
-        value: 0
-      });
-    }
+    Object.defineProperty(this, "length", {
+      writable: true,
+      enumerable: false,
+      configurable: false,
+      value: 0
+    });
 
     if (arguments.length === 1 && collection % 1 === 0) {
       this.length = -1 < collection ? collection : this.push(collection);

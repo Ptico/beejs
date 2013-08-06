@@ -10,13 +10,14 @@ define('base/querystring', ['base/util'], function(util) {
       timeFormat: false
     },
     escape: encodeURIComponent,
-    unescape: function(str) { return decodeURIComponent(s.replace(/\+/g, ' ')); },
+    unescape: decodeURIComponent,
     stringify: function(object, options) {
       return (new Stringify(object, options)).result;
     }
   };
 
   function visitString(k, v) {
+    /*jshint validthis:true */
     this.arr.push(k + this.eq + QueryString.escape(v.toString()));
   }
 

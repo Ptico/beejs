@@ -2,6 +2,10 @@
 
 [![Build Status](https://secure.travis-ci.org/Ptico/beejs.png)](http://travis-ci.org/Ptico/beejs)
 
+## Requirements
+IE < 8 support is not guaranteed
+IE 8 requires an [ES5 Shim](https://github.com/kriskowal/es5-shim) (both shim.js and sham.js)
+
 ## Base
 
 ### Event

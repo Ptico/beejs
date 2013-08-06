@@ -1,7 +1,7 @@
 define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerable, selector) {
   "use strict";
 
-  var dom, DOMMethods, inArray,
+  var dom, DOMMethods,
       finder, matcher,
       yep    = true, // Try to save couple bytes :)
       win    = window,
@@ -9,23 +9,6 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       spaceReg = /[\n\t\r]/g,
       inserts = ["bottom", "top", "before", "after"],
       booleans, camels, attrParamFix, props, customAttrs;
-
-  // IE compatible inArray
-  if (!Array.prototype.indexOf) {
-    inArray = function(val, arr) {
-      var l = arr.length,
-          i = 0;
-
-      while(i < l) {
-        if (arr[i++] === val) return yep;
-      }
-      return false;
-    };
-  } else {
-    inArray = function(val, arr) {
-      return Array.prototype.indexOf.call(arr, val) > -1;
-    };
-  }
 
   // Set selector engine
   if ("matchesSelector" in selector) { // Sizzle
@@ -74,14 +57,12 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
    */
   function DOMWrapper(nodes) {
     // Hide length from enums if possible
-    if (Object.defineProperty !== void 0) {
-      Object.defineProperty(this, "length", {
-        writable: true,
-        enumerable: false,
-        configurable: false,
-        value: 0
-      });
-    }
+    Object.defineProperty(this, "length", {
+      writable: true,
+      enumerable: false,
+      configurable: false,
+      value: 0
+    });
 
     if (!nodes) return;
     if (nodes.wrapped) return nodes;
@@ -234,7 +215,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
 
             optVal = (!optVal || optVal.specified) ? opt.value : opt.text;
 
-            opt.selected = inArray(optVal, valueArr);
+            opt.selected = valueArr.indexOf(optVal) > -1;
           }
         } else el.value = val;
       }

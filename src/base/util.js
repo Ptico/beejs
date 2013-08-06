@@ -7,6 +7,35 @@ define("base/util", [], function() {
       yearStart = new Date("Jan 1 " + (new Date()).getFullYear()),
       dateFuncs, nativeDateFuncs;
 
+  // Augment and extend helpers
+  function pushOrCreate(target, attr, val) {
+    if (Array.isArray(target[attr])) {
+      if (target[attr].indexOf(val) > -1) return false;
+
+      target[attr].push(val);
+    } else {
+      target[attr] = [val];
+    }
+
+    return true;
+  }
+
+  function initAncestors() {
+    /*jshint validthis:true */
+    var ancestors = this._ancestors,
+        proto = Object.getPrototypeOf(this),
+        l = ancestors.length,
+        i = 0;
+
+    while(i < l) {
+      var ancestor = ancestors[i++],
+          provides = ancestor.provides,
+          options  = provides ? proto['_' + provides + 'DefaultOptions'] : void 0;
+
+      ancestor.call(this, options);
+    }
+  }
+
   var util = {
 
     locale: "en",
@@ -43,52 +72,52 @@ define("base/util", [], function() {
     },
 
     /**
-     * Extend an object constructor with bee.js module
+     * Augment an object constructor with bee.js module
      *
-     * @param {Function} source    Module which provides functionality
      * @param {Function} target    Target constructor
+     * @param {Function} source    Module which provides functionality
      * @param {Object}   [options] Module options to apply to target
      */
-    provide: function(source, target, options) {
-      var provides = source.provides;
+    augment: function(target, source, options) {
+      var provides    = source.provides,
+          targetProto = target.prototype;
 
-      util.merge(target.prototype, source.prototype);
+      if (!target.prototype) throw new Error('Target should be a constructor');
 
       if (provides) {
-        if (target.contains && target.contains.length) {
-          target.contains.push(provides);
-        } else {
-          target.contains = [provides];
-        }
+        if (!pushOrCreate(targetProto, '_contains', provides)) return;
 
         if (options) {
-          target.prototype["_" + provides + "Options"] = options;
+          targetProto['_' + provides + 'DefaultOptions'] = options;
         }
       }
+
+      pushOrCreate(targetProto, '_ancestors', source);
+
+      if (!targetProto.hasOwnProperty('_initAncestors')) {
+        targetProto._initAncestors = initAncestors;
+      }
+
+      util.merge(targetProto, source.prototype);
     },
 
     /**
-     * Mixin bee.js module to target instance
+     * Extend instance with bee.js module
      *
      * @param {Function} source    Module which provides functionality
      * @param {Function} target    Target instance
      * @param {Object}   [options] Module options to apply to target instance
      */
-    mix: function(source, target, options) {
+    extend: function(target, source, options) {
       var provides = source.provides;
+
+      if (provides && !pushOrCreate(target, '_contains', provides)) return;
 
       util.merge(target, source.prototype);
 
-      if (provides) {
-        if (util.typeOf(target.provides, "array")) {
-          target.contains.push(provides);
-        } else {
-          target.contains = [provides];
-        }
-      }
-
       source.call(target, options);
     },
+
 
     /**
      * Merge source property to target object

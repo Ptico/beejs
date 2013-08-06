@@ -1,7 +1,7 @@
 define("base/event", [], function() {
   "use strict";
 
-  var baseEvent, EventListener, EventTarget;
+  var baseEvent, EventListener;
 
   function merge(target, source) {
     for (var key in source) {
@@ -186,12 +186,13 @@ define("base/event", [], function() {
    * @param {EventTarget} [options.broadcast] Global event target to publish
    * @param {String}      [options.prefix]    Prefix for event types
    */
-  EventTarget = function(options) {
+  function EventTarget(options) {
     this._events = {};
-    this._eventOptions = (options || this.__proto__._eventOptions || {}); // TODO - check eventOptions read/rewrite
+
+    this._eventOptions = (options || {});
     this._eventTargets = [];
     this._eventDeferred = {};
-  };
+  }
 
   EventTarget.prototype = {
 
