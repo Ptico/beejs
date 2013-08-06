@@ -9,8 +9,43 @@ define('base/querystring', ['base/util'], function(util) {
       keyIndex: false,
       timeFormat: false
     },
+
+    /**
+     * Escape symbols for URI. Used internally. May be redefined.
+     *
+     * @param {String} String to escape
+     *
+     * @returns {String} Escaped string
+     */
     escape: encodeURIComponent,
+
+    /**
+     * Unescape encoded URI symbols. Used internally. May be redefined.
+     *
+     * @param {String} String to unescape
+     *
+     * @returns {String} Unescaped string
+     */
     unescape: decodeURIComponent,
+
+    /**
+     * Serialize object to query string
+     *
+     *     QueryString.stringify({a: {b: 'c', d: 'f'}}); // "a[b]=c&a[d]=f"
+     *     QueryString.stringify({a: [1, 2]}); // "a=foo&b[]=1&b[]=2"
+     *     QueryString.stringify({a: [1, 2]}, {keys: false}); // "a=1&a=2"
+     *     QueryString.stringify({a: [1, 2]}, {keyIndex: true}); // "a[0]=1&a[1]=2"
+     *
+     * @param {Object} object    Object with data
+     * @param {Object} [options] Build options
+     * @param {Boolean} [options.keys]       If true, adds `[]` to key name. Default: true
+     * @param {Boolean} [options.keyIndex]   If true, adds array index to key. Default: false
+     * @param {String}  [options.timeFormat] Time as strftime string. If not set: displays time as unix timestamp
+     * @param {String}  [options.eq]         Symbol used as key-value separator. Default: '='
+     * @param {String}  [options.separator]  Symbol used as pairs separator. Default: '&'
+     *
+     * @returns {String} Query string
+     */
     stringify: function(object, options) {
       return (new Stringify(object, options)).result;
     }
