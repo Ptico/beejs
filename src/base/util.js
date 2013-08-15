@@ -9,7 +9,7 @@ define("base/util", [], function() {
 
   // Augment and extend helpers
   function pushOrCreate(target, attr, val) {
-    if (Array.isArray(target[attr])) {
+    if (target[attr] instanceof Array) {
       if (target[attr].indexOf(val) > -1) return false;
 
       target[attr].push(val);
@@ -133,6 +133,54 @@ define("base/util", [], function() {
       }
 
       return target;
+    },
+
+    deepMerge: function(target, source, mutable) {
+      var target_is_array = target instanceof Array,
+          source_is_array = source instanceof Array,
+          dest;
+
+      if (mutable) {
+        if (target_is_array && !source_is_array) throw new Error("Object can't be merged into array");
+        dest = target;
+      } else {
+        if (target_is_array && source_is_array) {
+          dest = target.slice();
+        } else dest = util.merge({}, target);
+      }
+
+      if (source_is_array) {
+        var i = 0, l = source.length;
+
+        while(i < l) {
+          var existing = dest[i],
+              val = source[i];
+
+          if (dest[i]) {
+            if (typeof val === 'object' && typeof existing === 'object') {
+              dest[i] = util.deepMerge(dest[i], val);
+            } else if (target_is_array) {
+              if (val) {
+                dest.push(val);
+              }
+            } else dest[i] = val;
+          } else {
+            dest[i] = val;
+          }
+
+          i++;
+        }
+      } else {
+        for (var key in source) {
+          if (source.hasOwnProperty(key)) {
+            if (dest[key] && typeof source[key] === 'object') {
+              dest[key] = util.deepMerge(dest[key], source[key]);
+            } else dest[key] = source[key];
+          }
+        }
+      }
+
+      return dest;
     },
 
     delegate: function(source, target /*, arguments*/) {},
