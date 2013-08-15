@@ -18,9 +18,9 @@ define(['base/querystring'], function(QueryString) {
       });
 
       it('can be a formatted string', function() {
-        var result = QueryString.stringify(obj, { timeFormat: '%d %m', escape: false });
+        var result = QueryString.stringify(obj, { timeFormat: '%m %Y', escape: false });
 
-        expect(result).to.be.eql('created_at=10 05');
+        expect(result).to.be.eql('created_at=05 1986');
       });
     });
 
