@@ -51,7 +51,7 @@ define('base/querystring', ['base/util'], function(util) {
      *
      * @param {Object} object    Object with data
      * @param {Object} [options] Build options
-     * @param {Boolean} [options.brackets]       If true, adds `[]` to key name. Default: true
+     * @param {Boolean} [options.brackets]   If true, adds `[]` to key name. Default: true
      * @param {Boolean} [options.keyIndex]   If true, adds array index to key. Default: true
      * @param {String}  [options.timeFormat] Time as strftime string. If not set: displays time as unix timestamp
      * @param {String}  [options.eq]         Symbol used as key-value delimiter. Default: '='
@@ -72,7 +72,6 @@ define('base/querystring', ['base/util'], function(util) {
      *
      * @param {String} string   Query string
      * @param {Object} [optins] Parse options
-     * @param {Boolean} [options.brackets]       If false - merge values into array. Default: true
      * @param {String}  [options.eq]         Symbol used as key-value delimiter. Default: '='
      * @param {String}  [options.delimiter]  Symbol used as pairs delimiter. Default: '&'
      *
