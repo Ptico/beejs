@@ -46,7 +46,7 @@ define(['base/querystring'], function(QueryString) {
       });
 
       it('can create old-style array', function() {
-        var result = QueryString.stringify(obj, { keys: false });
+        var result = QueryString.stringify(obj, { brackets: false });
 
         expect(result).to.be.eql('a=1&a=2&b=3&b=4');
       });
@@ -92,6 +92,22 @@ define(['base/querystring'], function(QueryString) {
   });
 
   describe('Parse', function() {
+    describe('Basic parsing', function() {
+      var examples = {
+        'a=b': { a: 'b' },
+        'a=b&b=2': { a: 'b', b: 2 },
+        'a=':  { a: '' },
+        'a=b=c': { a: 'b=c' },
+        'a=b=c&c': { a: 'b=c', c: undefined }
+      };
+
+      it('should parse simple key-values', function() {
+        for (var str in examples) {
+          expect(QueryString.parse(str)).to.be.eql(examples[str]);
+        }
+      });
+    });
+
     describe('Coercion', function() {
       var result;
 
@@ -143,25 +159,29 @@ define(['base/querystring'], function(QueryString) {
       it('should parse arrays when []', function() {
         var result = QueryString.parse('a[]=1&a[]=2&ab=3&a[]=5');
 
-        expect(result.a).to.be.eql([1, 2, 5]);
-      });
-
-      it('should parse array when repetitive keys', function() {
-        var result = QueryString.parse('a=1&a=2&ab=3&a=5', { keys: false });
-
+        expect(result.a).to.be.an('array');
         expect(result.a).to.be.eql([1, 2, 5]);
       });
 
       it('should parse array when indices', function() {
         var result = QueryString.parse('a[0]=1&a[1]=2&ab=3&a[2]=5');
 
+        expect(result.a).to.be.an('array');
         expect(result.a).to.be.eql([1, 2, 5]);
       });
 
       it('should parse nested array', function() {
         var result = QueryString.parse('a[0]=1&a[1][]=2&a[1][]=3&ab=3&a[2]=5');
 
+        expect(result.a).to.be.an('array');
+        expect(result.a[1]).to.be.an('array');
         expect(result.a).to.be.eql([1, [2, 3], 5]);
+      });
+
+      it('should parse unsorted array', function() {
+        var result = QueryString.parse('a[1]=2&a[0]=1&a[2]=3');
+
+        expect(result.a).to.be.eql([1, 2, 3]);
       });
     });
 
@@ -176,6 +196,13 @@ define(['base/querystring'], function(QueryString) {
         var result = QueryString.parse('obj[a][a]=1&obj[a][b]=2');
 
         expect(result.obj.a).to.be.eql({ a: 1, b: 2 });
+      });
+
+      it('should parse objects with array value', function() {
+        var result = QueryString.parse('obj[a][]=1&obj[a][]=2&obj[b]=3');
+
+        expect(result.obj.a).to.be.an('array');
+        expect(result.obj).to.be.eql({ a: [1, 2], b: 3 })
       });
     });
 

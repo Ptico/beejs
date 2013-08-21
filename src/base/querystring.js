@@ -14,7 +14,7 @@ define('base/querystring', ['base/util'], function(util) {
     defaults: {
       delimiter: '&',
       eq: '=',
-      keys: true,
+      brackets: true,
       keyIndex: true,
       timeFormat: false,
       escape: true
@@ -45,13 +45,13 @@ define('base/querystring', ['base/util'], function(util) {
      *
      *     QueryString.stringify({a: {b: 'c', d: 'f'}}); // "a[b]=c&a[d]=f"
      *     QueryString.stringify({a: 'foo, b: [1, 2]}); // "a=foo&b[]=1&b[]=2"
-     *     QueryString.stringify({a: [1, 2]}, {keys: false}); // "a=1&a=2"
+     *     QueryString.stringify({a: [1, 2]}, {brackets: false}); // "a=1&a=2"
      *     QueryString.stringify({a: [1, 2]}, {keyIndex: true}); // "a[0]=1&a[1]=2"
      *     QueryString.stringify({a: 1, b: 2}, { eq: ':', delimiter: ',' }); // "a:1,b:2"
      *
      * @param {Object} object    Object with data
      * @param {Object} [options] Build options
-     * @param {Boolean} [options.keys]       If true, adds `[]` to key name. Default: true
+     * @param {Boolean} [options.brackets]       If true, adds `[]` to key name. Default: true
      * @param {Boolean} [options.keyIndex]   If true, adds array index to key. Default: true
      * @param {String}  [options.timeFormat] Time as strftime string. If not set: displays time as unix timestamp
      * @param {String}  [options.eq]         Symbol used as key-value delimiter. Default: '='
@@ -68,20 +68,35 @@ define('base/querystring', ['base/util'], function(util) {
      *
      *     QueryString.parse('a[b]=c&a[d]=f'); // {a: {b: 'c', d: 'f'}}
      *     QueryString.parse('a=foo&b[]=1&b[]=2'); // {a: 'foo, b: [1, 2]}
-     *     QueryString.parse('a=1&a=2'); // { a: 2 }
-     *     QueryString.parse('a=1&a=2', { keys: false }); // { a: [1, 2] }
      *     QueryString.parse('a:1,b:2', { eq: ':', delimiter: ',' }); // { a: 1, b: 2 }
      *
      * @param {String} string   Query string
      * @param {Object} [optins] Parse options
-     * @param {Boolean} [options.keys]       If false - merge values into array. Default: true
+     * @param {Boolean} [options.brackets]       If false - merge values into array. Default: true
      * @param {String}  [options.eq]         Symbol used as key-value delimiter. Default: '='
      * @param {String}  [options.delimiter]  Symbol used as pairs delimiter. Default: '&'
      *
      * @returns {Object} Deserialized object
      */
     parse: function(string, options) {
-      return (new Parser(string, options)).result;
+      var opts = Object.create(QueryString.defaults),
+          result = {},
+          arr;
+
+      util.merge(opts, options);
+
+      string = string.replace(plusReg, ' ');
+      arr    = string.split(opts.delimiter);
+
+      arr.reduce(function(result, v) {
+        var pair = v.split(opts.eq),
+            key  = QueryString.unescape(pair.shift()),
+            val  = pair.length === 0 ? undefined : QueryString.unescape(pair.join(opts.eq));
+
+        return parsePiece(key, coerce(val), result);
+      }, result);
+
+      return result;
     }
   };
 
@@ -97,7 +112,7 @@ define('base/querystring', ['base/util'], function(util) {
     // Assign options to object variables
     var  sep  = opts.delimiter;
     this.eq   = opts.eq;
-    this.keys = opts.keys;
+    this.brackets = opts.brackets;
     this.keyIndex   = opts.keyIndex;
     this.escape     = opts.escape;
     this.timeFormat = opts.timeFormat;
@@ -153,7 +168,7 @@ define('base/querystring', ['base/util'], function(util) {
       array: function(k, v) {
         var l = v.length,
             i = 0,
-            keys = this.keys,
+            brackets = this.brackets,
             ki   = this.keyIndex,
             nested;
 
@@ -168,8 +183,8 @@ define('base/querystring', ['base/util'], function(util) {
           var key = k,
               val = v[i];
 
-          // If option `keys` is true - insert brackets indicated array
-          if (keys) {
+          // If option `brackets` is true - insert brackets indicated array
+          if (brackets) {
             // If option `keyIndex` is true or value contains another
             // objects - insert index inside brackets: foo[0], foo[1] ...
             // Otherwise: use only []: foo[], foo[]
@@ -198,115 +213,60 @@ define('base/querystring', ['base/util'], function(util) {
     }
   };
 
-
-
   ////////////////////////////
   ////////// Parser //////////
   ////////////////////////////
-  function Parser(string, options) {
-    var result = {},
-        opts = Object.create(QueryString.defaults),
-        i = 0, l,
-        arr,
-        newarr = new Array(l);
+  function parsePiece(k, v, previous) {
 
-    // Merge default options
-    util.merge(opts, options);
+    var bs = k.indexOf('[');
 
-    // Replace + with space
-    string = string.replace(plusReg, ' ');
+    if (bs > -1) { // Given 'foo[1][a][]'
+      var init = k.slice(0, bs) + ']', // 'foo]'
+          rest = k.slice(bs + 1), // '1][a][]'
+          arr  = rest.split('['), // [ '1]', 'a]', ']' ]
+          obj  = previous,
+          l = arr.length + 1, i = 0;
 
-    // Get array of key-value pairs
-    arr = string.split(opts.delimiter);
-    l = arr.length;
+      arr.unshift(init);
 
-    // Map step: convert array of pairs to array of parsed object trees
-    // F.e: a[1][q]=42 will be transformed to { a: [ undefined, { q: 42 } ] }
-    while (i < l) {
-      var pair = arr[i].split(opts.eq),
-          key  = QueryString.unescape(pair.shift()),
-          val  = QueryString.unescape(pair.join('='));
+      while (i < l) { // ['foo]', '1]', 'a]', ']' ]
+        var key  = arr[i].slice(0, -1), // ['foo', '1', 'a', '']
+            next = arr[i+1];
 
-      newarr[i++] = this.parsePiece(key, this.coerce(val));
-    }
+        if (!obj[key]) {
+          if (next) {
+            next = next.slice(0, -1);
 
-    // Reduce step: merge array of trees to the single object
-    i = 0;
-    if (opts.keys) {
-      while (i < l) result = util.deepMerge(result, newarr[i++]);
-    } else { // Only flat objects supported when we don't have `[]`
-      while (i < l) {
-        var obj = newarr[i++];
-
-        for (var k in obj) {
-          var v = obj[k];
-
-          if (result.hasOwnProperty(k)) {
-            var existing = result[k];
-
-            if (!(existing instanceof Array)) result[k] = [existing]; // If key already exists - create array
-
-            result[k].push(v);
+            obj[key] = (!isNaN(next)) ? [] : {};
           } else {
-            result[k] = v;
+            if ((obj instanceof Array) && key === '') {
+              obj.push(v);
+            } else {
+              obj[key] = v;
+            }
           }
         }
+
+        obj = obj[key];
+
+        i++;
       }
+    } else {
+      previous[k] = v;
     }
 
-    // Assign result
-    this.result = result;
+    return previous;
   }
 
-  Parser.prototype = {
-    // Build object from the key and value
-    parsePiece: function(k, v) {
+  function coerce(val) {
+    if (!isNaN(val)) return +val; // Number
 
-      // Parse the key and find nested objects
-      // keyReg.exec('key[1][a][]') -> ["key[1][a][]", "key[1][a]", ""]
-      // keyReg.exec('key[1][a]') -> ["key[1][a]", "key[1]", "a"]
-      // keyReg.exec('key[1]) -> ["key[1]", "key", "1"]
-      // keyReg.exec('key) -> null
-      var split = keyReg.exec(k);
+    // Boolean
+    if ('true' === val) return true;
+    if ('false' === val) return false;
 
-      if (split) { // Recursively build nested object tree
-        var rest, key, val;
-
-        rest = split[1];
-        key  = split[2]; // Array/Object key
-
-        if (key === '') { // Array without index TODO: trim
-          val = [v];
-        } else {
-          if (!isNaN(key)) { // If key is number - create empty array and insert value to it's position
-            var index = +key;
-            val = new Array(index + 1);
-            val[index] = v;
-          } else { // If key a string - create object
-            val = {};
-            val[key] = v;
-          }
-        }
-
-        return this.parsePiece(rest, val);
-      } else { // Just a single key-value or the root of object tree
-        var res = {};
-        res[k] = v;
-        return res;
-      }
-    },
-
-    // Coerce value type
-    coerce: function(val) {
-      if (!isNaN(val)) return +val; // Number
-
-      // Boolean
-      if ('true' === val) return true;
-      if ('false' === val) return false;
-
-      return val;
-    }
-  };
+    return val;
+  }
 
   return QueryString;
 });
