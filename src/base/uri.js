@@ -1,4 +1,6 @@
-define("base/uri", [], function() {
+define('base/uri', [], function() {
+  'use strict';
+
   /* URI Regexp
     /^
       (?:
@@ -18,174 +20,209 @@ define("base/uri", [], function() {
   var uriReg = /^(?:(?:([\w.+\-]+):)?\/\/)?(?:([^:@]*)(?::([^:@]*))?@)?([^:\/?#]+)?(?::(\d*))?(\/[^?#]*)?(?:\?([^#]*))?(#.*)?$/;
 
   function URI(URIString) {
-    var parts = URIString.match(uriReg);
+    if (typeof URIString !== 'undefined') {
+      var parts = URIString.match(uriReg);
 
-    if (parts[1]) this._protocol = parts[1];
-    if (parts[2]) this._username = parts[2];
-    if (parts[3]) this._password = parts[3];
-    if (parts[5]) this._port     = parts[5];
-    if (parts[6]) this._path     = parts[6];
-    if (parts[7]) this._query    = parts[7];
-    if (parts[8]) this._hash     = parts[8];
+      if (parts[1]) this._protocol = parts[1];
+      if (parts[2]) this._username = parts[2];
+      if (parts[3]) this._password = parts[3];
+      if (parts[5]) this._port     = parts[5];
+      if (parts[6]) this._path     = parts[6];
+      if (parts[7]) this._query    = parts[7];
+      if (parts[8]) this.fragment  = parts[8];
 
-    if (parts[4]) this._splitHostname(parts[4]);
+      if (parts[4]) this._splitHostname(parts[4]);
+    }
   }
 
   URI.prototype = {
-    protocol: function(val) {
-      if (val) {
-        this._protocol = val;
-        return this;
-      } else {
-        return this._protocol || '';
-      }
+    get protocol() {
+      return this._protocol || '';
     },
 
-    username: function(val) {
-      if (val) {
-        this._username = val;
-        return this;
-      } else {
-        return this._username || '';
-      }
+    set protocol(val) {
+      this._protocol = val;
     },
 
-    userinfo: function(val) {
-      if (val) {
-        this._splitUserinfo(val);
-        return this;
-      } else {
-        var result = '';
+    setProtocol: function(val) {
+      this._protocol = val;
+      return this;
+    },
 
-        if (this._username) {
-          result += this._username;
+    get user() {
+      return this._username || '';
+    },
 
-          if (this._password) {
-            result += ':' + this._password;
-          }
+    set user(val) {
+      this._username = val;
+    },
+
+    setUser: function(val) {
+      this._username = val;
+      return this;
+    },
+
+    get password() {
+      return this._password || '';
+    },
+
+    set password(val) {
+      this._password = val;
+    },
+
+    setPassword: function(val) {
+      this._password = val;
+      return this;
+    },
+
+    get userinfo() {
+      var result = '';
+
+      if (this._username) {
+        result += this._username;
+
+        if (this._password) {
+          result += ':' + this._password;
         }
-
-        return result;
       }
+
+      return result;
     },
 
-    password: function(val) {
-      if (val) {
-        this._password = val;
-        return this;
-      } else {
-        return this._password || '';
-      }
+    set userinfo(val) {
+      this._splitUserinfo(val);
     },
 
-    hostname: function(val) {
-      if (val) {
-        this._splitHostname(val);
-        return this;
-      } else {
-        var result = '';
-
-        if (this._domain) {
-          result += this._domain;
-          if (this._tld) result += '.';
-        }
-
-        if (this._tld) result += this._tld;
-
-        return result;
-      }
+    setUserInfo: function(val) {
+      this._splitUserinfo(val);
+      return this;
     },
 
-    host: function(val) {
-      if (val) {
-        this._splitHostAndPort(val);
-        return this;
-      } else {
-        var hostname = this.hostname(),
-            result = '';
+    get host() {
+      var result = '';
 
-        if (hostname) result += hostname;
-        if (this._port) result += ':' + this._port;
-
-        return result;
+      if (this._domain) {
+        result += this._domain;
+        if (this._tld) result += '.';
       }
+
+      if (this._tld) result += this._tld;
+
+      return result;
     },
 
-    tld: function(val) {
-      if (val) {
-        this._tld = val;
-        return this;
-      } else {
-        return this._tld || '';
-      }
+    set host(val) {
+      this._splitHostname(val);
     },
 
-    port: function(val) {
-      if (val) {
-        this._port = val;
-        return this;
-      } else {
-        return this._port || '';
-      }
+    setHost: function(val) {
+      this._splitHostname(val);
+      return this;
     },
 
-    path: function(val) {
-      if (val) {
-        this._path = val;
-        return this;
-      } else {
-        return (this._path && this._path.length > 0) ? this._path : '/';
-      }
+    get tld() {
+      return this._tld || '';
     },
 
-    query: function(val) {
-      if (val) {
-        this._query = val;
-        return this;
-      } else {
-        return this._query || '';
-      }
+    set tld(val) {
+      this._tld = val;
     },
 
-    hash: function(val) {
-      if (val) {
-        this._hash = val;
-        return this;
-      } else {
-        return this._hash || '';
-      }
+    setTld: function(val) {
+      this._tld = val; // TODO - remove leading `.`
+      return this;
+    },
+
+    get port() {
+      return this._port || '';
+    },
+
+    set port(val) {
+      this._port = val;
+    },
+
+    setPort: function(val) {
+      this._port = val;
+      return this;
+    },
+
+    get path() {
+      return (this._path && this._path.length > 0) ? this._path : '';
+    },
+
+    set path(val) {
+      this._path = val;
+    },
+
+    setPath: function(val) {
+      this._path = val;
+      return this;
+    },
+
+    get query() {
+      return this._query ? encodeURI(this._query) : '';
+    },
+
+    set query(val) {
+      this._query = val; // TODO - remove leading `?`
+    },
+
+    setQuery: function(val) {
+      this.query = val;
+      return this;
+    },
+
+    get hash() {
+      return (this._fragment && this._fragment.length > 0) ? ('#' + this._fragment) : '';
+    },
+
+    set hash(val) {
+      this._fragment = (val.substr(0, 1) === '#') ? val.substr(1) : val;
+    },
+
+    setHash: function(val) {
+      this.hash = val;
+    },
+
+    get fragment() {
+      return this._fragment || '';
+    },
+
+    set fragment(val) {
+      this._fragment = (val.substr(0, 1) === '#') ? val.substr(1) : val;
+    },
+
+    setFragment: function(val) {
+      this.fragment = val;
+      return this;
     },
 
     toString: function() {
       var parts = [],
           protocol = this._protocol,
-          userInfo = this.userinfo(),
-          host     = this.host(),
-          query    = this.query();
+          userInfo = this.userinfo,
+          host     = this.host,
+          port     = this._port,
+          query    = this.query;
 
-      if (protocol) {
-        parts.push(protocol + '://');
-      }
+      if (protocol) parts.push(protocol + '://');
 
       if (userInfo.length > 0) {
         parts.push(userInfo);
-        if (host) {
-          parts.push('@');
-        }
+        parts.push('@');
       }
 
-      if (host) {
-        parts.push(host);
-      }
+      if (host) parts.push(host);
+      if (port) parts.push(':' + this.port);
 
-      parts.push(this.path());
+      parts.push(this.path);
 
       if (query.length > 0) {
         parts.push('?');
         parts.push(query);
       }
 
-      parts.push(this._hash);
+      parts.push(this.hash);
 
       return parts.join('');
     },
@@ -203,13 +240,6 @@ define("base/uri", [], function() {
 
       this._username = parts.shift();
       this._password = parts.join(':');
-    },
-
-    _splitHostAndPort: function(hostAndPort) {
-      var parts = hostAndPort.split(':');
-
-      this._splitHostname(parts[0]);
-      this._port = parts[1];
     }
   };
 
