@@ -20,7 +20,7 @@ define('base/uri', [], function() {
   var uriReg = /^(?:(?:([\w.+\-]+):)?\/\/)?(?:([^:@]*)(?::([^:@]*))?@)?([^:\/?#]+)?(?::(\d*))?(\/[^?#]*)?(?:\?([^#]*))?(#.*)?$/;
 
   function URI(URIString) {
-    if (typeof URIString !== 'undefined') {
+    if (typeof URIString != 'undefined') {
       var parts = URIString.match(uriReg);
 
       if (parts[1]) this._protocol = parts[1];

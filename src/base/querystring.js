@@ -173,7 +173,7 @@ define('base/querystring', ['base/util'], function(util) {
 
         // Detect array or object and force inserting indices
         nested = v.filter(function(v) {
-          return typeof(v) == 'object' && ((v instanceof Array) || toStr.call(v) === '[object Object]');
+          return typeof(v) == 'object' && ((v instanceof Array) || toStr.call(v) == '[object Object]');
         }).length > 0;
         if (nested) ki = true;
 
@@ -187,7 +187,7 @@ define('base/querystring', ['base/util'], function(util) {
             // If option `keyIndex` is true or value contains another
             // objects - insert index inside brackets: foo[0], foo[1] ...
             // Otherwise: use only []: foo[], foo[]
-            key += (ki || typeof(val) === 'object') ? '[' + i + ']' : '[]';
+            key += (ki || typeof(val) == 'object') ? '[' + i + ']' : '[]';
           }
 
           this.visit(key, val);

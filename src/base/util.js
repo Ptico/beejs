@@ -50,13 +50,13 @@ define("base/util", [], function() {
           i = 0,
           target, l, name, obj;
 
-      if (typeof first === "string") {
+      if (typeof first == "string") {
         target = this, name = first, obj = arguments[1];
       } else {
         target = first, name = arguments[1], obj = arguments[2];
       }
 
-      obj = obj !== undefined ? obj : {};
+      obj = (obj !== undefined) ? obj : {};
 
       nsArray = name.split(".");
       l = nsArray.length;
@@ -157,7 +157,7 @@ define("base/util", [], function() {
               val = source[i];
 
           if (dest[i]) {
-            if (typeof val === 'object' && typeof existing === 'object') {
+            if (typeof val == 'object' && typeof existing == 'object') {
               dest[i] = util.deepMerge(dest[i], val);
             } else if (target_is_array) {
               if (val) {
@@ -173,7 +173,7 @@ define("base/util", [], function() {
       } else {
         for (var key in source) {
           if (source.hasOwnProperty(key)) {
-            if (dest[key] && typeof source[key] === 'object') {
+            if (dest[key] && typeof source[key] == 'object') {
               dest[key] = util.deepMerge(dest[key], source[key]);
             } else dest[key] = source[key];
           }
@@ -185,7 +185,6 @@ define("base/util", [], function() {
 
     delegate: function(source, target /*, arguments*/) {},
 
-    /*jshint eqeqeq:false */
     /**
      * Get real type of object
      * Fix for builtin typeof function, which returns incorrect type for Array, Date, RegExp and null

@@ -11,10 +11,9 @@ define("browser/cookieStore", [], function() {
       options = options || {};
 
       var cookieString = encodeURIComponent(key) + "=",
-          valType = typeof(value),
           path    = options.path || "/";
 
-      if (valType === "object") {
+      if (typeof(value) == "object") {
         cookieString += JSON.stringify(value);
       } else cookieString += escape(value);
 
@@ -51,7 +50,7 @@ define("browser/cookieStore", [], function() {
 
           if (start === "{" || start === "[") {
             return JSON.parse(val);
-          } else if (val === "undefined") {
+          } else if (val == "undefined") {
             return void 0;
           } else {
             return unescape(val);

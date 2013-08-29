@@ -1,254 +1,187 @@
-define(["browser/net"], function(net) {
-  describe("Net", function() {
-    describe("HTTP methods", function() {
-      var xhr, requests;
+define(['browser/net'], function(net) {
+  describe('Net', function() {
 
-      beforeEach(function() {
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        xhr.onCreate = function (req) { requests.push(req); };
+    describe('Request', function() {
+
+      xdescribe('HTTP methods', function() {
+        var xhr, requests;
+
+        beforeEach(function() {
+          xhr = sinon.useFakeXMLHttpRequest();
+          requests = [];
+          xhr.onCreate = function (req) { requests.push(req); };
+        });
+
+        afterEach(function() {
+          xhr.restore();
+        });
+
+        it('should send GET requests', function() {
+          var req = new net.Request('get', '/'),
+              result;
+
+          req.send();
+
+          expect(requests[0].method).to.be.equal('GET');
+          expect(requests[0].url).to.be.equal('/');
+        });
+
+        it('should send POST requests', function() {
+          var req = new net.Request('post', '/'),
+              result;
+
+          req.send();
+
+          expect(requests[0].method).to.be.equal('POST');
+          expect(requests[0].url).to.be.equal('/');
+        });
+
+        it('should send PUT requests', function() {
+          var req = new net.Request('put', '/'),
+              result;
+
+          req.send();
+
+          expect(requests[0].method).to.be.equal('PUT');
+          expect(requests[0].url).to.be.equal('/');
+        });
+
+        it('should send PATCH requests', function() {
+          var req = new net.Request('patch', '/'),
+              result;
+
+          req.send();
+
+          expect(requests[0].method).to.be.equal('PATCH');
+          expect(requests[0].url).to.be.equal('/');
+        });
+
+        it('should send DELETE requests', function() {
+          var req = new net.Request('delete', '/'),
+              result;
+
+          req.send();
+
+          expect(requests[0].method).to.be.equal('DELETE');
+          expect(requests[0].url).to.be.equal('/');
+        });
       });
 
-      afterEach(function() {
-        xhr.restore();
-      });
+      xdescribe('data', function() {});
 
-      it("should send GET requests", function() {
-        var req = new net.Request("get", "/"),
-            result;
-
-        req.send();
-
-        expect(requests[0].method).to.be.equal("GET");
-        expect(requests[0].url).to.be.equal("/");
-      });
-
-      it("should send POST requests", function() {
-        var req = new net.Request("post", "/"),
-            result;
-
-        req.send();
-
-        expect(requests[0].method).to.be.equal("POST");
-        expect(requests[0].url).to.be.equal("/");
-      });
-
-      it("should send PUT requests", function() {
-        var req = new net.Request("put", "/"),
-            result;
-
-        req.send();
-
-        expect(requests[0].method).to.be.equal("PUT");
-        expect(requests[0].url).to.be.equal("/");
-      });
-
-      it("should send PATCH requests", function() {
-        var req = new net.Request("patch", "/"),
-            result;
-
-        req.send();
-
-        expect(requests[0].method).to.be.equal("PATCH");
-        expect(requests[0].url).to.be.equal("/");
-      });
-
-      it("should send DELETE requests", function() {
-        var req = new net.Request("delete", "/"),
-            result;
-
-        req.send();
-
-        expect(requests[0].method).to.be.equal("DELETE");
-        expect(requests[0].url).to.be.equal("/");
-      });
+      xdescribe('options', function() {});
     });
 
-    describe("Emulated HTTP methods", function() {
-      var xhr, requests;
+    describe('Response', function() {
+      var xhr, request, response;
 
       beforeEach(function() {
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        xhr.onCreate = function (req) { requests.push(req); };
+        xhr = new sinon.FakeXMLHttpRequest();
       });
 
-      afterEach(function() {
-        xhr.restore();
+      describe('metadata', function() {
+        beforeEach(function() {
+          request  = { xhr: xhr }; // Stub
+          response = new net.Response(xhr, request);
+        });
+
+        it('should inject original request', function() {
+          expect(response.request).to.be.eql(request);
+        });
+
+        it('should inject original xhr object', function() {
+          expect(response.xhr).to.be.eql(xhr);
+        });
       });
 
-      it("should send GET requests", function() {
-        var req = new net.Request("get", "/"),
-            result;
+      describe('statuses', function() {
+        it('should contains response status', function() {
+          xhr.respond(201);
+          response = new net.Response(xhr);
 
-        req.send();
+          expect(response.status).to.be.eql(201);
+          expect(response.statusType).to.be.eql('success');
+          expect(response.statusText).to.be.eql('Created');
+        });
 
-        expect(requests[0].method).to.be.equal("GET");
-        expect(requests[0].url).to.be.equal("/");
-        expect(requests[0].requestBody).to.be.equal(null);
+        it('should set success property', function() {
+          xhr.respond(201);
+          response = new net.Response(xhr);
+
+          expect(response.success).to.be.ok();
+          expect(response.error).to.not.be.ok();
+        });
+
+        it('should set info property', function() {
+          xhr.respond(100);
+          response = new net.Response(xhr);
+
+          expect(response.info).to.be.ok();
+          expect(response.success).to.not.be.ok();
+        });
+
+        it('should set clientError property', function() {
+          xhr.respond(404);
+          response = new net.Response(xhr);
+
+          expect(response.clientError).to.be.ok();
+          expect(response.error).to.be.ok();
+          expect(response.serverError).to.not.be.ok();
+        });
+
+        it('should set serverError property', function() {
+          xhr.respond(503);
+          response = new net.Response(xhr);
+
+          expect(response.serverError).to.be.ok();
+          expect(response.error).to.be.ok();
+          expect(response.clientError).to.not.be.ok();
+        });
       });
 
-      it("should send POST requests", function() {
-        var req = new net.Request("post", "/"),
-            result;
+      describe('headers', function() {
+        beforeEach(function() {
+          xhr.respond(200, { 'Content-Type': 'application/json', 'X-Custom-Header': 'somedata' });
+          response = new net.Response(xhr);
+        });
 
-        req.send();
+        it('should contains response headers', function() {
+          expect(response.headers['Content-Type']).to.be.eql('application/json');
+          expect(response.headers['X-Custom-Header']).to.be.eql('somedata');
+        });
 
-        expect(requests[0].method).to.be.equal("POST");
-        expect(requests[0].url).to.be.equal("/");
-        expect(requests[0].requestBody).to.be.eql({});
+        it('should get headers case-insensitive', function() {
+          expect(response.get('x-custom-header')).to.be.eql('somedata');
+          expect(response.get('x-Custom-hEader')).to.be.eql('somedata');
+        });
+
+        it('should set Content-Type', function() {
+          expect(response.contentType).to.be.eql('application/json');
+        });
+
+        it('should set type', function() {
+          expect(response.type).to.be.eql('json');
+        });
       });
 
-      it("should send PUT requests", function() {
-        var req = new net.Request("put", "/"),
-            result;
+      describe('data', function() {
+        it('should contains response text', function() {
+          xhr.respond(200, { 'Content-Type': 'text/plain' }, 'Hello!');
+          response = new net.Response(xhr);
 
-        req.set("emulate", true);
-        req.send();
+          expect(response.text).to.be.eql('Hello!');
+        });
 
-        expect(requests[0].method).to.be.equal("POST");
-        expect(requests[0].url).to.be.equal("/");
-        expect(requests[0].requestBody).to.be.eql({ _method: "PUT" });
+        it('should parse JSON', function() {
+          xhr.respond(200, { 'Content-Type': 'application/json' }, '{"name": "Andrey"}');
+          response = new net.Response(xhr);
+
+          expect(response.json).to.be.eql({ name: 'Andrey' });
+          expect(response.body).to.be.eql({ name: 'Andrey' });
+          expect(response.text).to.be.eql('{"name": "Andrey"}');
+        });
       });
 
-      it("should send PATCH requests", function() {
-        var req = new net.Request("patch", "/"),
-            result;
-
-        req.set("emulate", true);
-        req.send();
-
-        expect(requests[0].method).to.be.equal("POST");
-        expect(requests[0].url).to.be.equal("/");
-        expect(requests[0].requestBody).to.be.eql({ _method: "PATCH" });
-      });
-
-      it("should send DELETE requests", function() {
-        var req = new net.Request("delete", "/"),
-            result;
-
-        req.set("emulate", true);
-        req.send();
-
-        expect(requests[0].method).to.be.equal("POST");
-        expect(requests[0].url).to.be.equal("/");
-        expect(requests[0].requestBody).to.be.eql({ _method: "DELETE" });
-      });
-    });
-
-    describe("Data", function() {
-      var xhr, requests;
-
-      beforeEach(function() {
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        xhr.onCreate = function (req) { requests.push(req); };
-      });
-
-      afterEach(function() {
-        xhr.restore();
-      });
-
-      it("should send GET data", function() {
-        var req = new net.Request("get", "/");
-
-        req.setData("one", 1).setData("two", 2).send();
-
-        expect(requests[0].url).to.be.equal("/?one=1&two=2");
-        expect(requests[0].requestBody).to.be.eql(null);
-      });
-
-      it("should send POST data", function() {
-        var req = new net.Request("post", "/");
-
-        req.setData("one", 1);
-
-        req.setData({
-          two: 2,
-          three: 3
-        }).send();
-
-        expect(requests[0].url).to.be.equal("/");
-        expect(requests[0].requestBody).to.be.eql({ one: 1, two: 2, three: 3 });
-      });
-
-      it("should escape GET data", function() {
-        var req = new net.Request("get", "/");
-
-        req.setData("greeting", "Hello world").setData("тест", "раз").send();
-
-        expect(requests[0].url).to.be.equal("/?greeting=Hello%20world&%D1%82%D0%B5%D1%81%D1%82=%D1%80%D0%B0%D0%B7");
-      });
-
-      it("should interpolate data in URL's", function() {
-        var req = new net.Request("post", "/users/:id/:action");
-
-        req.setData({
-          id: 42,
-          action: "edit",
-          email: "user@example.com"
-        }).send();
-
-        expect(requests[0].url).to.be.equal("/users/42/edit");
-        expect(requests[0].requestBody).to.be.eql({ email: "user@example.com" });
-      });
-    });
-
-    describe("Promise", function() {
-      var xhr, spyOne, spyTwo, requests, req;
-
-      beforeEach(function() {
-        xhr    = sinon.useFakeXMLHttpRequest();
-        spyOne = sinon.spy();
-        spyTwo = sinon.spy();
-        req    = new net.Request("get", "/");
-        requests = [];
-        xhr.onCreate = function (req) { requests.push(req); };
-      });
-
-      afterEach(function() {
-        xhr.restore();
-      });
-
-      it("should call success promise", function() {
-        req.done(spyOne).fail(spyTwo).send();
-        requests[0].respond(200);
-
-        expect(spyOne).to.be.calledOnce();
-        expect(spyTwo).to.not.be.called();
-      });
-
-      it("should call fail promise", function() {
-        req.done(spyOne).fail(spyTwo).send();
-        requests[0].respond(404);
-
-        expect(spyOne).to.not.be.called();
-        expect(spyTwo).to.be.calledOnce();
-      });
-
-      it("should call anyway promise when done", function() {
-        req.anyway(spyOne).fail(spyTwo).send();
-        requests[0].respond(200);
-
-        expect(spyOne).to.be.calledOnce();
-        expect(spyTwo).to.not.be.called();
-      });
-
-      it("should call anyway promise when fail", function() {
-        req.anyway(spyOne).done(spyTwo).send();
-        requests[0].respond(500);
-
-        expect(spyOne).to.be.calledOnce();
-        expect(spyTwo).to.not.be.called();
-      });
-
-      it("should call promise after complete", function() {
-        req.send();
-        requests[0].respond(200);
-
-        req.done(spyOne);
-        expect(spyOne).to.be.calledOnce();
-      });
     });
   });
 });

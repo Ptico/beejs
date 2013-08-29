@@ -108,7 +108,7 @@ define("browser/event", ["browser/dom"], function(dom) {
     on: function(type, callback, context, once) {
       var nodes = this, i = nodes.length, delegate = false;
 
-      if (typeof(callback) === "string") {
+      if (typeof(callback) == "string") {
         delegate = callback;
         callback = context;
         context  = once;
@@ -150,7 +150,7 @@ define("browser/event", ["browser/dom"], function(dom) {
      * @param {Function} callback Listener function to add
      */
     once: function(type, callback, context) {
-      if (typeof(callback) === "string") {
+      if (typeof(callback) == "string") {
         return this.on(type, callback, context, arguments[4], true);
       } else {
         return this.on(type, callback, context, true);
@@ -203,7 +203,7 @@ define("browser/event", ["browser/dom"], function(dom) {
     off: function(type, callback) {
       var nodes = this, i = nodes.length, delegate = false;
 
-      if (typeof(callback) === "string") {
+      if (typeof(callback) == "string") {
         delegate = callback;
         callback = arguments[2];
       }

@@ -11,6 +11,7 @@ define("base/attribute", ["base/util"], function(util) {
      * Set attribute
      */
     set: function(obj, key, value) {
+      /*jshint boss:true */
       return (obj._attrs[key] = value);
     },
 
@@ -133,7 +134,6 @@ define("base/attribute", ["base/util"], function(util) {
         var validate  = conf.validate,
             validType = util.typeOf(validate);
 
-        /*jshint eqeqeq:false */
         if (validType == "regexp") {
           if (!validate.test(val + "")) return false;
         } else if (validType == "function") {
@@ -157,7 +157,9 @@ define("base/attribute", ["base/util"], function(util) {
      */
     update: function(attributes) {
       for (var key in attributes) {
-        this.set(key, attributes[key]);
+        if (attributes.hasOwnProperty(key)) {
+          this.set(key, attributes[key]);
+        }
       }
 
       return this;

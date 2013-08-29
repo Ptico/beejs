@@ -37,7 +37,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
 
     var result;
 
-    if (typeof stor === "string") {
+    if (typeof stor == "string") {
       if (!context) context = doc;
       result = finder(stor, context);
     } else if (stor.nodeType) {
@@ -361,7 +361,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
         names = className;
       } else if (arguments.length > 1) { // Arguments list
         names = arguments;
-      } else if (typeof(className) === "string") { // Single class name or space-separated list
+      } else if (typeof(className) == "string") { // Single class name or space-separated list
         names = className.split(" ");
       } else return this; // Bullshit given
 
@@ -400,7 +400,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
         names = className;
       } else if (arguments.length > 1) { // Arguments list
         names = arguments;
-      } else if (typeof(className) === "string") { // Single class name or space-separated list
+      } else if (typeof(className) == "string") { // Single class name or space-separated list
         names = className.split(" ");
       } else return this;
 
@@ -602,7 +602,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     up: function(cond) {
       cond = cond || 0;
 
-      var byInd = typeof(cond) === "number",
+      var byInd = typeof(cond) == "number",
           result = new DOMWrapper(),
           nodes = this,
           len = nodes.length,
@@ -689,7 +689,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
      * @param {Number}        [index] Index in siblings list
      */
     next: function(stor, index) {
-      if (typeof(stor) !== "string") {
+      if (typeof(stor) != "string") {
         index = stor;
         stor = void 0;
       }
@@ -717,7 +717,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
      * @param {Number}        [index] Index in siblings list
      */
     prev: function(stor, index) {
-      if (typeof(stor) !== "string") {
+      if (typeof(stor) != "string") {
         index = stor;
         stor = void 0;
       }
@@ -773,12 +773,12 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
           insTypes = [], insTypesLen;
 
       if (insertion === void 0) {
-        if (where.wrapped || where.nodeType || whereType === "string") {
+        if (where.wrapped || where.nodeType || whereType == "string") {
           objs = { 'bottom': where };
-        } else if (whereType === "object") {
+        } else if (whereType == "object") {
           objs = where;
         } else return this;
-      } else if (whereType === "string") {
+      } else if (whereType == "string") {
         objs[where] = insertion;
       } else return this;
 
@@ -791,7 +791,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
             if (multInsert) ins.clean(true);
 
             objs[key] = ins.toFragment();
-          } else if (typeof(ins) === "string") {
+          } else if (typeof(ins) == "string") {
             objs[key] = parseHTML(ins);
           }
 
@@ -810,13 +810,13 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
               fragment = multInsert ? objs[type].cloneNode(true) : objs[type],
               parent;
 
-          if (type === "before") {
+          if (type == "before") {
             parent = el.parentNode;
             if (parent) parent.insertBefore(fragment, el);
-          } else if (type === "after") {
+          } else if (type == "after") {
             parent = el.parentNode;
             if (parent) parent.insertBefore(fragment, el.nextSibling);
-          } else if (type === "bottom") {
+          } else if (type == "bottom") {
             el.appendChild(fragment);
           } else { // top
             el.insertBefore(fragment, el.firstChild);

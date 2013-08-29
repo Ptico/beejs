@@ -2,38 +2,37 @@ module.exports = function( grunt ) {
   "use strict";
 
   grunt.loadNpmTasks('grunt-mocha');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
 
   grunt.initConfig({
     // Project metadata, used by some directives, helpers and tasks.
     meta: {},
 
-    // Lists of files to be linted with JSHint, used by the "lint" task.
-    lint: {
-      files: ["src/**/*.js"]
-    },
-
     // Global configuration options for JSHint.
     jshint: {
-      forin:    true,
-      noarg:    true,
-      noempty:  true,
-      bitwise:  true,
-      eqeqeq:   true,
-      strict:   true,
-      undef:    true,
-      browser:  true,
-      trailing: true,
-      regexp:   true,
-      expr:     true,
-      indent:   2,
-      globals: {
-        define: true,
-        window: true,
-        escape: true,
-        unescape: true,
-        setTimeout: true,
-        setInterval: true,
-        clearInterval: true
+      all: ["src/**/*.js"],
+      options: {
+        forin:    true,
+        noarg:    true,
+        noempty:  true,
+        bitwise:  false,
+        eqeqeq:   false,
+        strict:   true,
+        undef:    true,
+        browser:  true,
+        trailing: true,
+        regexp:   true,
+        expr:     true,
+        indent:   2,
+        globals: {
+          define: true,
+          window: true,
+          escape: true,
+          unescape: true,
+          setTimeout: true,
+          setInterval: true,
+          clearInterval: true
+        }
       }
     },
 
@@ -81,5 +80,5 @@ module.exports = function( grunt ) {
   });
 
   grunt.registerTask('test', 'mocha');
-  grunt.registerTask('default', 'lint mocha');
+  grunt.registerTask('default', ['jshint', 'mocha']);
 };
