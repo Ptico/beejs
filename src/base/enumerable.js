@@ -478,7 +478,6 @@ define("base/enumerable", [], function() {
    * @param {collection} Array to convert to List
    */
   List = function(collection) {
-    // Hide length from enums if possible
     Object.defineProperty(this, "length", {
       writable: true,
       enumerable: false,

@@ -8,7 +8,7 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       doc    = win.document,
       spaceReg = /[\n\t\r]/g,
       inserts = ["bottom", "top", "before", "after"],
-      booleans, camels, attrParamFix, props, customAttrs;
+      booleans, camels, props, customAttrs;
 
   // Set selector engine
   if ("matchesSelector" in selector) { // Sizzle
@@ -138,23 +138,12 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
     contenteditable : "contentEditable"
   };
 
-  // Attributes which needs additional param for getAttribute in IE
-  attrParamFix = {
-    width:  yep,
-    height: yep,
-    src:    yep,
-    href:   yep
-  };
-
   // DOM-properties
   props = {
     'html':  'innerHTML',
     'class': 'className',
     'for':   'htmlFor',
-    'text':  (function() {
-      var temp = doc.createElement('div');
-      return (temp.textContent === null) ? 'innerText' : 'textContent';
-    })()
+    'text':  'textContent'
   };
 
   // Getters/setters for non-standart properties
@@ -453,8 +442,6 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
         while (i--) result[i] = customAttrs[attr].get(this[i]) || "";
       } else if (props[attr]) {
         while (i--) result[i] = this[i][props[attr]];
-      } else if (attrParamFix[attr]) {
-        while (i--) result[i] = this[i].getAttribute(attr, 2) || "";
       } else if (bool) {
         while (i--) result[i] = !!this[i][attr];
       } else {
@@ -880,8 +867,6 @@ define("browser/dom", ["base/enumerable", "vendor/selector"], function(enumerabl
       while (i--) {
         var el = nodes[i],
             type = el.type;
-
-        if (type === "checkbox" || type === "radio") el.defaultChecked = el.checked; // IE 7
 
         el.removeAttribute("id");
       }

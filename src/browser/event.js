@@ -5,13 +5,11 @@ define("browser/event", ["browser/dom"], function(dom) {
       doc  = win.document,
       html = doc.documentElement,
       body = doc.body,
-      ael  = ("addEventListener" in body),
-      console   = win.console,
+      console = win.console,
       // DomLoad
       domLoaded = false,
       domLoadCallbacks = [],
       domLoadHandler,
-      domLoadInterval,
       domLoadCallbacksAttached = false;
 
   function createEventHandler(element, delegate) {
@@ -23,16 +21,12 @@ define("browser/event", ["browser/dom"], function(dom) {
   function fixEvent(event, element) {
     event = event || win.event;
 
-    if (!event.target) event.target = event.srcElement || element; // IE 7/8
-
     if (event.target && event.target.nodeType === 3) event.target = event.target.parentNode; // Safari. TODO - check if bug resolved and remove this
 
     if (event.pageX === null && event.clientX !== null) {
       event.pageX = event.clientX + (html && html.scrollLeft || body && body.scrollLeft || 0) - (html && html.clientLeft || body && body.clientLeft || 0);
       event.pageY = event.clientY + (html && html.scrollTop || body && body.scrollTop || 0) - (html && html.clientTop || body && body.clientTop || 0);
     }
-
-    event.metaKey = !!event.metaKey; // IE 7/8
 
     event.stop = function() {
       event.preventDefault(event);
@@ -85,11 +79,8 @@ define("browser/event", ["browser/dom"], function(dom) {
 
   function unloadEvent(element, type) {
     delete element.events[type];
-    if (ael) {
-      element.removeEventListener(type, element.eventHandler, false);
-    } else {
-      element.detachEvent("on" + type, element.eventHandler);
-    }
+
+    element.removeEventListener(type, element.eventHandler, false);
   }
 
   dom.implement({
@@ -128,11 +119,7 @@ define("browser/event", ["browser/dom"], function(dom) {
         if (!el.events[type]) {
           el.events[type] = [handler];
 
-          if (ael) {
-            el.addEventListener(type, el.eventHandler, false);
-          } else {
-            el.attachEvent("on" + type, el.eventHandler);
-          }
+          el.addEventListener(type, el.eventHandler, false);
         } else {
           el.events[type].push(handler);
         }
@@ -171,16 +158,10 @@ define("browser/event", ["browser/dom"], function(dom) {
         var el = nodes[i++],
             event;
 
-        if (ael) {
-          event = doc.createEvent('HTMLEvents');
-          event.eventName = type;
-          event.initEvent(type, true, true);
-          el.dispatchEvent(event);
-        } else {
-          event = doc.createEventObject();
-
-          el.fireEvent("on" + type, event);
-        }
+        event = doc.createEvent('HTMLEvents');
+        event.eventName = type;
+        event.initEvent(type, true, true);
+        el.dispatchEvent(event);
       }
 
       return this;
@@ -243,12 +224,8 @@ define("browser/event", ["browser/dom"], function(dom) {
     if (!domLoaded) {
       var len = domLoadCallbacks.length, i = 0;
 
-      if (ael) {
-        doc.removeEventListener("DOMContentLoaded", domLoadHandler, false);
-        win.removeEventListener("load", domLoadHandler, false);
-      } else win.detachEvent("onload", domLoadHandler);
-
-      if (domLoadInterval) clearInterval(domLoadInterval);
+      doc.removeEventListener("DOMContentLoaded", domLoadHandler, false);
+      win.removeEventListener("load", domLoadHandler, false);
 
       while (i < len) {
         var handler = domLoadCallbacks[i++];
@@ -285,29 +262,8 @@ define("browser/event", ["browser/dom"], function(dom) {
         (!doc.attachEvent && doc.readyState === "interactive")) setTimeout(domLoadHandler, 1);
 
     if (!domLoadCallbacksAttached) {
-      if (ael) {
-        doc.addEventListener("DOMContentLoaded", domLoadHandler, false);
-        win.addEventListener("load", domLoadHandler, false);
-      } else {
-        var testDiv, isTop = false;
-
-        win.attachEvent("onload", domLoadHandler);
-
-        testDiv = doc.createElement('div');
-
-        try {
-          isTop = win.frameElement === null;
-        } catch (e) {}
-
-        if (testDiv.doScroll && isTop && window.external) {
-          domLoadInterval = setInterval(function() {
-            try {
-              testDiv.doScroll();
-              domLoadHandler();
-            } catch (e) {}
-          }, 30);
-        }
-      }
+      doc.addEventListener("DOMContentLoaded", domLoadHandler, false);
+      win.addEventListener("load", domLoadHandler, false);
 
       domLoadCallbacksAttached = true;
     }
