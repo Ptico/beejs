@@ -4,6 +4,7 @@ module.exports = function( grunt ) {
   grunt.loadNpmTasks('grunt-mocha');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.initConfig({
     // Project metadata, used by some directives, helpers and tasks.
@@ -12,6 +13,9 @@ module.exports = function( grunt ) {
     // Global configuration options for JSHint.
     jshint: {
       all: ["src/**/*.js"],
+      base: ['src/base/*.js'],
+      browser: ['src/browser/*.js'],
+
       options: {
         forin:    true,
         noarg:    true,
@@ -77,11 +81,17 @@ module.exports = function( grunt ) {
       }
     },
 
-    // Lists of files to be unit tested with Nodeunit, used by the "test" task.
-    test: {},
-
     // Configuration options for the "watch" task.
-    watch: {}
+    watch: {
+      base: {
+        files: ['src/base/*.js'],
+        tasks: ['jshint:base', 'mocha:base']
+      },
+      browser: {
+        files: ['src/browser/*.js'],
+        tasks: ['jshint:browser', 'mocha:browser']
+      }
+    }
 
   });
 
