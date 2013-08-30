@@ -3,6 +3,7 @@ module.exports = function( grunt ) {
 
   grunt.loadNpmTasks('grunt-mocha');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-connect');
 
   grunt.initConfig({
     // Project metadata, used by some directives, helpers and tasks.
@@ -66,9 +67,14 @@ module.exports = function( grunt ) {
     },
 
     // Configuration options for the "server" task.
-    server: {
-      port: 8000,
-      base: '.'
+    connect: {
+      server: {
+        options: {
+          port: 8000,
+          base: '.',
+          keepalive: true
+        }
+      }
     },
 
     // Lists of files to be unit tested with Nodeunit, used by the "test" task.
