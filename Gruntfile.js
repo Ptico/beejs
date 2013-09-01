@@ -6,6 +6,8 @@ module.exports = function( grunt ) {
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+
   grunt.initConfig({
     // Project metadata, used by some directives, helpers and tasks.
     meta: {},
@@ -57,7 +59,30 @@ module.exports = function( grunt ) {
 
     // Global configuration options for UglifyJS.
     uglify: {
-      
+      options: {
+        report: 'gzip'
+      },
+
+      amd_base: {
+        files: {
+          'dist/amd/base/util.js':        ['src/base/util.js'],
+          'dist/amd/base/attribute.js':   ['src/base/attribute.js'],
+          'dist/amd/base/event.js':       ['src/base/event.js'],
+          'dist/amd/base/enumerable.js':  ['src/base/enumerable.js'],
+          'dist/amd/base/promise.js':     ['src/base/promise.js'],
+          'dist/amd/base/querystring.js': ['src/base/querystring.js'],
+          'dist/amd/base/uri.js':         ['src/base/uri.js']
+        }
+      },
+
+      amd_browser: {
+        files: {
+          'dist/amd/browser/dom.js':   ['src/browser/dom.js'],
+          'dist/amd/browser/event.js': ['src/browser/event.js'],
+          'dist/amd/browser/net.js':   ['src/browser/net.js'],
+          'dist/amd/browser/cookieStore.js': ['src/browser/cookieStore.js']
+        }
+      }
     },
 
     // headless testing through PhantomJS
