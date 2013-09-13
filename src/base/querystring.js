@@ -149,6 +149,9 @@ define('base/querystring', ['base/util'], function(util) {
       string: visitString,
       number: visitString,
       boolean: visitString,
+      'undefined': function(k, v) {
+        this.arr.push(k);
+      },
 
       // Visit date: konvert value to strftime string when option `timeFormat` is set
       date: function(k, v) {

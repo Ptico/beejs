@@ -109,11 +109,11 @@ module.exports = function( grunt ) {
     // Configuration options for the "watch" task.
     watch: {
       base: {
-        files: ['src/base/*.js'],
+        files: ['src/base/*.js', 'test/specs/base/*Spec.js'],
         tasks: ['jshint:base', 'mocha:base']
       },
       browser: {
-        files: ['src/browser/*.js'],
+        files: ['src/browser/*.js', 'test/specs/*Spec.js'],
         tasks: ['jshint:browser', 'mocha:browser']
       }
     }
