@@ -35,9 +35,11 @@ module.exports = function( grunt ) {
           define: true,
           window: true,
           escape: true,
+          process: true,
           unescape: true,
           setTimeout: true,
           setInterval: true,
+          setImmediate: true,
           clearInterval: true
         }
       }
@@ -109,11 +111,11 @@ module.exports = function( grunt ) {
     // Configuration options for the "watch" task.
     watch: {
       base: {
-        files: ['src/base/*.js', 'test/specs/base/*Spec.js'],
+        files: ['src/base/*.js', 'test/specs/base/**/*.js'],
         tasks: ['jshint:base', 'mocha:base']
       },
       browser: {
-        files: ['src/browser/*.js', 'test/specs/*Spec.js'],
+        files: ['src/browser/*.js', 'test/specs/browser/**/*.js'],
         tasks: ['jshint:browser', 'mocha:browser']
       }
     }

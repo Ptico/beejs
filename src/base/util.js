@@ -41,37 +41,6 @@ define("base/util", [], function() {
     locale: "en",
 
     /**
-     * Create a namespace for a given object
-     *
-     *     util.namespace(this, "hello.world");
-     */
-    namespace: function() {
-      var first = arguments[0], nsArray,
-          i = 0,
-          target, l, name, obj;
-
-      if (typeof first == "string") {
-        target = this, name = first, obj = arguments[1];
-      } else {
-        target = first, name = arguments[1], obj = arguments[2];
-      }
-
-      obj = (obj !== undefined) ? obj : {};
-
-      nsArray = name.split(".");
-      l = nsArray.length;
-
-      for (; i < l; i++) {
-        var part = nsArray[i];
-
-        if (target[part] === undefined) target[part] = (i == l-1) ? obj : {}; // Assign an object if namespace part undefined
-        target = target[part];
-      }
-
-      return target;
-    },
-
-    /**
      * Augment an object constructor with bee.js module
      *
      * @param {Function} target    Target constructor
@@ -309,6 +278,7 @@ define("base/util", [], function() {
     B: function(t) { return util.locales[util.locale].months[t.getMonth()]; },
     b: function(t) { return util.locales[util.locale].monthAbbrs[t.getMonth()]; },
     d: function(t) { return ("0" + t.getDate()).slice(-2); },
+    D: function(t) { return dateFuncs.m(t) + '/' + dateFuncs.d(t) + '/' + dateFuncs.y(t); },
     H: function(t) { return ("0" + t.getHours()).slice(-2); },
     I: function(t) { return ("0" + dateFuncs.l(t)).slice(-2); },
     j: function(t) {

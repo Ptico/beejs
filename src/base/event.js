@@ -92,6 +92,8 @@ define("base/event", [], function() {
      * Note: Store array of objects, check for `once` property and push to new array if not once
      * is about 1.5-2x faster then other methods: http://jsperf.com/store-events-object-vs-array/2
      *
+     * TODO: Option for async processing (in case if before handler do something asynchronous)
+     *
      * @param {Object|Event} event
      */
     handle: function(event) {
