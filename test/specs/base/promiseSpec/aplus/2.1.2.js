@@ -5,7 +5,7 @@ define(function(require) {
       testFulfilled = require('spec/base/promiseSpec/aplus/helpers/testThreeCases').testFulfilled,
       dummy = { dummy: 'dummy' };
 
-  describe('2.1.2.1: When fulfilled, a promise: must not transition to any other state.', function () {
+  describe('2.1.2.1: When fulfilled, a promise: must not transition to any other state.', function() {
     testFulfilled(dummy, function(promise, done) {
       var onFulfilledCalled = false;
 
@@ -19,7 +19,7 @@ define(function(require) {
       setTimeout(done, 100);
     });
 
-    specify('trying to fulfill then immediately reject', function (done) {
+    specify('trying to fulfill then immediately reject', function(done) {
       var d = Promise.deferred(),
           onFulfilledCalled = false;
 
@@ -36,7 +36,7 @@ define(function(require) {
       setTimeout(done, 100);
     });
 
-    specify('trying to fulfill then reject, delayed', function (done) {
+    specify('trying to fulfill then reject, delayed', function(done) {
       var d = Promise.deferred(),
           onFulfilledCalled = false;
 
@@ -47,7 +47,7 @@ define(function(require) {
         done();
       });
 
-      setTimeout(function () {
+      setTimeout(function() {
         d.resolve(dummy);
         d.reject(dummy);
       }, 50);
@@ -55,7 +55,7 @@ define(function(require) {
       setTimeout(done, 100);
     });
 
-    specify('trying to fulfill immediately then reject delayed', function (done) {
+    specify('trying to fulfill immediately then reject delayed', function(done) {
       var d = Promise.deferred(),
           onFulfilledCalled = false;
 
@@ -68,7 +68,7 @@ define(function(require) {
 
       d.resolve(dummy);
 
-      setTimeout(function () {
+      setTimeout(function() {
         d.reject(dummy);
       }, 50);
 

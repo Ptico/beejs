@@ -147,4 +147,5 @@ define(['base/promise'], function(Promise) {
     }
   };
 
+  return thenables;
 });

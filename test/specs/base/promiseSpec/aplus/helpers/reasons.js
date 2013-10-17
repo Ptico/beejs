@@ -52,4 +52,5 @@ define(['base/promise'], function(Promise) {
     return Promise.rejected(dummy);
   };
 
+  return reasons;
 });

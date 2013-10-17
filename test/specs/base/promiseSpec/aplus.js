@@ -1,6 +1,6 @@
 define(function(require) {
   /**
-   * The promises A+ compliance test suite
+   * The Promises/A+ compliance test suite
    *
    * Converted from https://github.com/promises-aplus/promises-tests
    * Thanks @domenic and A+ team for this massive work!
