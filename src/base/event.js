@@ -358,9 +358,11 @@ define("base/event", [], function() {
 
         if (pLen > 1) {
           var pre  = parts[0] + ":*",
+              mid  = parts[0] + ':*:' + parts[pLen - 1],
               post = "*:" + parts[pLen - 1];
 
           if (this._events[pre])  this._events[pre].handle(event);
+          if (this._events[mid])  this._events[mid].handle(event);
           if (this._events[post]) this._events[post].handle(event);
         }
       }
