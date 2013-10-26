@@ -82,8 +82,8 @@
       resolve: function(x) {
         var self = this;
 
-        if (x === this.promise) { // 2.3.1 - promise and value are the same object
-          this.reject(new TypeError('Promise can not resolve itself'));
+        if (!!x && (typeof(x) == 'function' || typeof(x) == 'object')) { // 2.3.3
+          x = assimilate(this, x);
         }
 
         if (x instanceof Promise) { // 2.3.2 - value is trusted promise
@@ -93,40 +93,6 @@
           }
           if (x.isFulfilled()) this.fulfill(x.value); // 2.3.2.2
           if (x.isRejected())  this.reject(x.reason); // 2.3.2.3
-        } else if (!!x && (typeof(x) == 'function' || typeof(x) == 'object')) { // 2.3.3
-          var then;
-
-          try {
-            then = x.then; // 2.3.3.1
-          } catch (e) {
-            this.reject(e); // 2.3.3.2
-          }
-
-          // 2.3.3.3
-          if (typeof(then) == 'function') {
-            var callbackCalled = false,
-                resolvePromise, rejectPromise;
-
-            try {
-              then.call(x, function(y) {
-                if (!callbackCalled) { // 2.3.3.3.3
-                  callbackCalled = true;
-                  self.resolve(y);
-                }
-              }, function(r) {
-                if (!callbackCalled) {
-                  callbackCalled = true;
-                  self.reject(r);
-                }
-              });
-            } catch (e) { // 2.3.3.3.4
-              if (callbackCalled) {
-                this.reject(e); // 2.3.3.3.4.2
-              } // 2.3.3.3.4.1 - else ignore
-            }
-          } else {
-            this.fulfill(x); // 2.3.3.4
-          }
         } else this.fulfill(x); // 2.3.4
       }
     };
@@ -143,6 +109,45 @@
           handler(val); // 2.2.5
         }
       });
+    }
+
+    function assimilate(dfd, x) {
+      if (x === dfd.promise) { // 2.3.1 - promise and value are the same object
+        dfd.reject(new TypeError('Promise can not resolve itself'));
+      }
+
+      var then;
+
+      try {
+        then = x.then; // 2.3.3.1
+      } catch (e) {
+        dfd.reject(e); // 2.3.3.2
+      }
+
+      // 2.3.3.3
+      if (typeof(then) == 'function') {
+        return new Promise(function(resolve, reject) {
+          var callbackCalled = false;
+
+          try {
+            then.call(x, function(y) {
+              if (!callbackCalled) { // 2.3.3.3.3
+                callbackCalled = true;
+                resolve(y);
+              }
+            }, function(r) {
+              if (!callbackCalled) {
+                callbackCalled = true;
+                reject(r);
+              }
+            });
+          } catch (e) { // 2.3.3.3.4
+            if (!callbackCalled) { dfd.reject(e); } // 2.3.3.3.4.2
+          }
+        });
+      } else {
+        return x; // 2.3.3.4
+      }
     }
 
     /**

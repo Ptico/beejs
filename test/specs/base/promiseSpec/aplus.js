@@ -16,6 +16,6 @@ define(function(require) {
   require('spec/base/promiseSpec/aplus/2.2.7');
   require('spec/base/promiseSpec/aplus/2.3.1');
   require('spec/base/promiseSpec/aplus/2.3.2');
-  // require('spec/base/promiseSpec/aplus/2.3.3');
+  require('spec/base/promiseSpec/aplus/2.3.3');
   require('spec/base/promiseSpec/aplus/2.3.4');
 });
