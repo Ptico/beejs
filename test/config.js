@@ -14,7 +14,7 @@ requirejs.config({
       attach: 'mocha'
     }
   },
-  urlArgs: /debug\=1/.test(window.location.search) ? '' : 'bust=' +  (new Date()).getTime(), // debug
+  //urlArgs: /debug\=1/.test(window.location.search) ? '' : 'bust=' +  (new Date()).getTime(), // debug
   //urlArgs: 'v=1'
 });
 

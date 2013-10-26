@@ -89,6 +89,10 @@ module.exports = function( grunt ) {
 
     // headless testing through PhantomJS
     mocha: {
+      options: {
+        log: true,
+        reporter: 'Dot'
+      },
       base: {
         src: ["test/base.html"]
       },
