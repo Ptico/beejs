@@ -16,7 +16,7 @@ define(function(require) {
           promise2 = promise1.then();
 
       expect(typeof promise2 === 'object' || typeof promise2 === 'function').to.be.ok();
-      expect(promise2).to.be.eql(null);
+      // expect(promise2).to.be.eql(null); - TODO - wtf?
       expect(promise2.then).to.be.a('function');
     });
 

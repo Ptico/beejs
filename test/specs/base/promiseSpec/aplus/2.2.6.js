@@ -186,7 +186,7 @@ define(function(require) {
           promise.then(spy, handler3);
 
           promise.then(null, function(reason) {
-            assert.strictEqual(reason, sentinel);
+            expect(reason).to.be.equal(sentinel);
 
             // TODO: replace with BDD assertions
             sinon.assert.calledWith(handler1, sinon.match.same(sentinel));

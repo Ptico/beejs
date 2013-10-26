@@ -20,7 +20,8 @@ requirejs.config({
 
 mocha.setup({
   ui: 'bdd',
-  ignoreLeaks: false
+  ignoreLeaks: false,
+  timeout: 500
 });
 
 // Protect from barfs

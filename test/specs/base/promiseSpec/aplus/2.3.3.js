@@ -139,7 +139,7 @@ define(function(require) {
 
         testPromiseResolution(xFactory, function(promise, done) {
           promise.then(function() {
-            expect(numberOfTimesThenWasRetrieved).to.be.equal(a);
+            expect(numberOfTimesThenWasRetrieved).to.be.equal(1);
             done();
           });
         });

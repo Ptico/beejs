@@ -90,7 +90,7 @@ define(function(require) {
       });
 
       specify('trying to fulfill a pending promise more than once, immediately then delayed', function(done) {
-        var d = deferred(),
+        var d = Promise.deferred(),
             timesCalled = 0;
 
         d.promise.then(function onFulfilled() {

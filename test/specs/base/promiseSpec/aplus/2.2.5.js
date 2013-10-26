@@ -8,6 +8,8 @@ define(function(require) {
   describe('2.2.5 `onFulfilled` and `onRejected` must be called as functions (i.e. with no `this` value).', function() {
     describe('strict mode', function() {
       specify('fulfilled', function(done) {
+        alert(this);
+
         Promise.resolved(dummy).then(function onFulfilled() {
           'use strict';
 
