@@ -185,22 +185,7 @@
         var promise = Promise.pending();
 
         if (typeof(onFulfilled) == 'function') {
-          var callback = function(v) {
-            var dfd = promise.deferred,
-                ret;
-
-            try {
-              ret = onFulfilled(v);
-            } catch (e) {
-              return dfd.reject(e);
-            }
-
-            dfd.resolve(ret);
-          };
-
-          callback.origin = onFulfilled;
-
-          this.deferred.success(callback);
+          this.deferred.success(thenCallback(promise.deferred, onFulfilled));
         } else {
           this.deferred.success(function(v) {
             promise.deferred.fulfill(v);
@@ -208,22 +193,7 @@
         }
 
         if (typeof(onRejected) == 'function') {
-          var errback = function(r) {
-            var dfd = promise.deferred,
-                ret;
-
-            try {
-              ret = onRejected(r);
-            } catch (e) {
-              return dfd.reject(e);
-            }
-
-            dfd.resolve(ret);
-          };
-
-          errback.origin = onFulfilled;
-
-          this.deferred.fail(errback);
+          this.deferred.fail(thenCallback(promise.deferred, onRejected));
         } else {
           this.deferred.fail(function(v) {
             promise.deferred.reject(v);
@@ -232,6 +202,21 @@
 
         return promise;
       },
+
+      'yield': function() {},
+      tap: function() {},
+      spread: function() {},
+
+      // Array methods
+      all: function() {},
+      map: function() {},
+      reduce: function() {},
+      settle: function() {},
+      filter: function() {},
+      eachSlice: function() {},
+
+      any: function() {},
+      some: function() {},
 
       isPending: function() {
         return this.state === PENDING;
@@ -250,6 +235,8 @@
       return new Promise();
     };
 
+    Promise.when = function() {};
+
     Promise.fulfilled = Promise.resolved = function(value) {
       var deferred = (new Promise()).deferred;
 
@@ -266,10 +253,25 @@
       return deferred.promise;
     };
 
-    Promise.deferred  = function() {
+    Promise.deferred = function() {
       return (new Promise()).deferred;
     };
 
+    function thenCallback(dfd, callback) {
+      return function(v) {
+        var ret;
+
+        try {
+          ret = callback(v);
+        } catch (e) {
+          return dfd.reject(e);
+        }
+
+        dfd.resolve(ret);
+      };
+    }
+
     return Promise;
   });
+
 })(this);
