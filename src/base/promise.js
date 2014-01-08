@@ -47,6 +47,19 @@
         return this;
       },
 
+      progress: function(value) {
+        if (this.promise.state === PENDING) {
+          var callbacks = this._handlers.progress,
+              i = 0, l = callbacks.length;
+
+          while(i < l) {
+            callbacks[i++](value);
+          }
+        } else this.handlers.progress = nil;
+
+        return this;
+      },
+
       success: function(callback) {
         if (callback && this.promise.state === PENDING) {
           this._handlers[FULFILLED].push(callback);
@@ -87,12 +100,12 @@
         }
 
         if (x instanceof Promise) { // 2.3.2 - value is trusted promise
-          if (x.isPending()) { // 2.3.2.1 - wait until x is fulfilled or rejected
+          if (x.isPending) { // 2.3.2.1 - wait until x is fulfilled or rejected
             x.deferred.success(function(v) { self.fulfill(v); });
             x.deferred.fail(function(r) { self.reject(r);  });
           }
-          if (x.isFulfilled()) this.fulfill(x.value); // 2.3.2.2
-          if (x.isRejected())  this.reject(x.reason); // 2.3.2.3
+          if (x.isFulfilled) this.fulfill(x.value); // 2.3.2.2
+          if (x.isRejected)  this.reject(x.reason); // 2.3.2.3
         } else this.fulfill(x); // 2.3.4
       }
     };
@@ -130,17 +143,19 @@
           var callbackCalled = false;
 
           try {
-            then.call(x, function(y) {
-              if (!callbackCalled) { // 2.3.3.3.3
-                callbackCalled = true;
-                resolve(y);
-              }
-            }, function(r) {
-              if (!callbackCalled) {
-                callbackCalled = true;
-                reject(r);
-              }
-            });
+            then.call(x,
+              function(y) { // resolve
+                if (!callbackCalled) { // 2.3.3.3.3
+                  callbackCalled = true;
+                  resolve(y);
+                }
+              },
+              function(r) { // reject
+                if (!callbackCalled) {
+                  callbackCalled = true;
+                  reject(r);
+                }
+              });
           } catch (e) { // 2.3.3.3.4
             if (!callbackCalled) { dfd.reject(e); } // 2.3.3.3.4.2
           }
@@ -161,10 +176,10 @@
 
       this.uid = uid++;
 
-      this.state = PENDING;
+      this.state    = PENDING;
       this.deferred = deferred;
 
-      this.value = void 0;
+      this.value  = void 0;
       this.reason = void 0;
 
       if (typeof(resolver) == 'function') {
@@ -182,21 +197,23 @@
 
     Promise.prototype = {
       then: function(onFulfilled, onRejected) {
-        var promise = Promise.pending();
+        var promise     = Promise.pending(),
+            oldDeferred = this.deferred,
+            newDeferred = promise.deferred;
 
         if (typeof(onFulfilled) == 'function') {
-          this.deferred.success(thenCallback(promise.deferred, onFulfilled));
+          oldDeferred.success(thenCallback(newDeferred, onFulfilled));
         } else {
-          this.deferred.success(function(v) {
-            promise.deferred.fulfill(v);
+          oldDeferred.success(function(v) {
+            newDeferred.fulfill(v);
           });
         }
 
         if (typeof(onRejected) == 'function') {
-          this.deferred.fail(thenCallback(promise.deferred, onRejected));
+          oldDeferred.fail(thenCallback(newDeferred, onRejected));
         } else {
-          this.deferred.fail(function(v) {
-            promise.deferred.reject(v);
+          oldDeferred.fail(function(v) {
+            newDeferred.reject(v);
           });
         }
 
@@ -218,24 +235,54 @@
       any: function() {},
       some: function() {},
 
-      isPending: function() {
+      get isPending() {
         return this.state === PENDING;
       },
 
-      isFulfilled: function() {
+      get isFulfilled() {
         return this.state === FULFILLED;
       },
 
-      isRejected: function() {
+      get isRejected() {
         return this.state === REJECTED;
+      },
+
+      get result() {
+        return this.state === REJECTED ? this.reason : this.value;
       }
+    };
+
+    Promise.cast = function() {};
+
+    Promise.when = function() {};
+
+    Promise.all = function(arr) {
+      return new Promise(function(resolve, reject) {
+        var l = arr.length >>> 0,
+            rest = l,
+            i = 0,
+            results = [];
+
+        if (!rest) resolve(results);
+
+        for(; i < l; i++) {
+          var valOrPromise = arr[i];
+
+          if ('then' in valOrPromise) {
+            new Promise.cast(valOrPromise).then(function(res) {
+              results[i] = res;
+              if (!--rest) resolve(results);
+            });
+          } else {
+            results[i] = valOrPromise;
+          }
+        }
+      });
     };
 
     Promise.pending = function() {
       return new Promise();
     };
-
-    Promise.when = function() {};
 
     Promise.fulfilled = Promise.resolved = function(value) {
       var deferred = (new Promise()).deferred;
@@ -257,8 +304,16 @@
       return (new Promise()).deferred;
     };
 
+    Promise.isPromise = function(obj) {
+      return obj instanceof Promise;
+    };
+
+    Promise.isPromiseLike = function(obj) {
+      return obj && typeof(obj.then) == 'function';
+    };
+
     function thenCallback(dfd, callback) {
-      return function(v) {
+      var result = function(v) {
         var ret;
 
         try {
@@ -269,6 +324,10 @@
 
         dfd.resolve(ret);
       };
+
+      result.origin = callback;
+
+      return result;
     }
 
     return Promise;
